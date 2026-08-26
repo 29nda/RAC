@@ -183,24 +183,45 @@ Lalu *deploy* ulang: `npm run deploy`.
 
 ---
 
-## 6. Aktifkan *deploy* otomatis dari GitHub
+## 6. Deploy otomatis (Cloudflare Workers Builds)
 
-Repositori sudah menyertakan alur kerja di `.github/workflows/deploy.yml`.
-Alur ini memeriksa tipe, membangun, menjalankan migrasi, lalu *deploy* pada
-setiap dorongan (*push*) ke `main`.
+Repositori ini **sudah terhubung** ke Cloudflare Workers Builds. Setiap dorongan
+ke `main` memicu build dan deploy otomatis ke Worker bernama `rac`. Tidak ada
+*secret* GitHub yang perlu disetel — Cloudflare mengakses repo lewat integrasi
+Git-nya sendiri.
 
-Anda hanya perlu menambahkan dua *secret* di GitHub
-(**Settings → Secrets and variables → Actions**):
+Setelan build yang benar (Dashboard → **Workers & Pages** → `rac` →
+**Settings** → **Build**):
 
-| Nama | Dari mana |
+| Kolom | Nilai |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens → **Create Token** → templat *Edit Cloudflare Workers*, tambahkan izin **D1:Edit** |
-| `CLOUDFLARE_ACCOUNT_ID` | Terlihat di beranda Cloudflare Dashboard, atau jalankan `npx wrangler whoami` |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` |
+| Branch | `main` |
 
-Opsional, tambahkan *variable* (bukan secret) `PUBLIC_SITE_URL` bila domain
-Anda berbeda dari nilai bawaan.
+> **Migrasi database tidak ikut otomatis.** Workers Builds hanya membangun dan
+> men-*deploy*. Setiap kali Anda menambah berkas baru di `migrations/`,
+> jalankan sekali dari mesin Anda:
+>
+> ```bash
+> npx wrangler d1 migrations apply rac-db --remote
+> ```
 
----
+Pemeriksaan tipe dan build tetap berjalan di GitHub Actions
+(`.github/workflows/ci.yml`) pada setiap pull request, sehingga kesalahan
+tertangkap sebelum Cloudflare mencoba men-*deploy*.
+
+### Catatan penting soal `dist/.assetsignore`
+
+`wrangler.toml` mengarahkan pengunggah aset statis ke seluruh `dist/`, yang juga
+berisi bundel server terkompilasi di `dist/_worker.js/`. Tanpa daftar
+pengecualian, Wrangler **menolak men-*deploy* sama sekali** — dan seandainya
+dipaksa, seluruh kode server Anda akan dapat diunduh dari internet publik.
+
+Berkas `public/.assetsignore` mengurus hal ini. Astro menyalin isi `public/`
+apa adanya ke `dist/`, sehingga berkas tersebut mendarat di
+`dist/.assetsignore` tempat Wrangler mencarinya. **Jangan hapus berkas itu.**
 
 ## 7. Kirim situs ke mesin pencari
 
@@ -266,6 +287,10 @@ dijalankan. Jalankan `npx wrangler d1 migrations apply rac-db --remote`.
 **Unggahan media gagal / halaman Media bilang "Bucket R2 belum terhubung"**
 R2 belum diaktifkan untuk akun ini. Ikuti langkah 2c — aktifkan R2 lewat
 Dashboard, buat bucket-nya, lalu hapus komentar pada blok `[[r2_buckets]]`.
+
+**Deploy gagal: "Uploading a Pages _worker.js directory as an asset"**
+Berkas `public/.assetsignore` hilang atau tidak lagi memuat `_worker.js`.
+Kembalikan isinya, lalu `npm run build` ulang.
 
 **Deploy gagal dengan pesan soal binding atau UUID tidak valid**
 Salah satu binding di `wrangler.toml` menunjuk sumber daya yang tidak ada.

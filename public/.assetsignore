@@ -1,0 +1,12 @@
+# Files in dist/ that are NOT public static assets.
+#
+# `[assets] directory = "./dist"` in wrangler.toml points the static-asset
+# uploader at the whole build output, which also contains the compiled server
+# bundle. Without this list wrangler refuses to deploy at all — and if it were
+# forced through, the entire server bundle would be downloadable from the
+# public internet.
+#
+# Astro copies public/ verbatim into dist/, so this file lands at
+# dist/.assetsignore where wrangler looks for it.
+_worker.js
+_routes.json
