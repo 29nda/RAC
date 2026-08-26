@@ -19,7 +19,7 @@ di atas paket gratis Cloudflare, dengan dashboard admin yang dibuat khusus.
 | **Styling** | Tailwind CSS v4 |
 | **Basis data** | Cloudflare D1 (SQLite) |
 | **Cache** | Cloudflare KV + cache tepi (edge) |
-| **Media** | Cloudflare R2 |
+| **Media** | Cloudflare R2 (opsional — lihat SETUP.md 2c) |
 | **Bahasa** | Indonesia (`/`) dan Inggris (`/en/`) |
 | **Dependensi runtime** | Tidak ada di luar Astro — tanpa React, tanpa CDN pihak ketiga |
 
@@ -125,7 +125,7 @@ satu baris di sana, satu `view`, dan satu cabang di `src/pages/[...path].astro`.
 | `npm run build` | Membangun *worker* produksi ke `dist/` |
 | `npm run preview` | Menjalankan hasil build lewat Wrangler |
 | `npm run check` | Pemeriksaan tipe (`astro check`) |
-| `npm run deploy` | Build lalu `wrangler deploy` |
+| `npm run deploy` | Build lalu `wrangler deploy` (deploy manual; `main` sudah otomatis) |
 | `npm run db:migrate:local` | Migrasi D1 lokal |
 | `npm run db:migrate:remote` | Migrasi D1 produksi |
 | `npm run admin:hash -- "sandi"` | Membuat `ADMIN_PASSWORD_HASH` |

@@ -59,64 +59,62 @@ untuk dashboard.
 
 ---
 
-## 2. Buat layanan Cloudflare
+## 2. Layanan Cloudflare
 
-Masuk lebih dulu:
+D1 dan KV **sudah dibuat** dan ID-nya sudah tertulis di `wrangler.toml`:
 
-```bash
-npx wrangler login
-```
+| Layanan | Nama | Status |
+|---|---|---|
+| D1 | `rac-db` | dibuat di region APAC, migrasi sudah dijalankan |
+| KV | `rac-cache` | dibuat, dipakai untuk cache dan rate limit |
+| R2 | `rac-media` | **belum** — perlu diaktifkan lebih dulu (lihat 2c) |
 
-### 2a. D1 — basis data konten
+Anda tidak perlu mengulang langkah 2a dan 2b kecuali membangun ulang dari nol.
+
+### 2a. D1 — basis data konten (sudah ada)
 
 ```bash
 npx wrangler d1 create rac-db
 ```
 
-Perintah ini mencetak `database_id`. Salin ke `wrangler.toml`:
-
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "rac-db"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"   # ← tempel di sini
-migrations_dir = "migrations"
-```
+Perintah ini mencetak `database_id`; tempel ke `wrangler.toml` di bawah
+`[[d1_databases]]`.
 
 *Batas paket gratis: 5 GB penyimpanan, 5 juta baris dibaca per hari.*
 
-### 2b. KV — cache dan pembatas laju
+### 2b. KV — cache dan pembatas laju (sudah ada)
 
 ```bash
-npx wrangler kv namespace create RAC_CACHE
+npx wrangler kv namespace create rac-cache
 ```
 
 Salin `id` yang dicetak ke **kedua** blok `kv_namespaces` di `wrangler.toml`
-(`CACHE` dan `SESSION` menunjuk namespace yang sama):
-
-```toml
-[[kv_namespaces]]
-binding = "CACHE"
-id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"   # ← tempel di sini
-
-[[kv_namespaces]]
-binding = "SESSION"
-id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"   # ← dan di sini
-```
+(`CACHE` dan `SESSION` menunjuk namespace yang sama).
 
 *Batas paket gratis: 100.000 baca dan 1.000 tulis per hari.*
 
-### 2c. R2 — pustaka media
+### 2c. R2 — pustaka media (opsional, belum aktif)
 
-```bash
-npx wrangler r2 bucket create rac-media
-```
+> **R2 harus diaktifkan lewat Dashboard lebih dulu.** Berbeda dari D1 dan KV,
+> R2 tidak bisa dinyalakan lewat API atau CLI. Selama belum aktif, `wrangler`
+> akan menolak seluruh *deploy* bila binding-nya tidak dinonaktifkan — itulah
+> sebabnya blok `[[r2_buckets]]` di `wrangler.toml` sengaja dikomentari.
 
-Nama `rac-media` sudah tertulis di `wrangler.toml`, jadi tidak perlu diubah.
+Situs berjalan normal tanpa R2. Yang belum tersedia hanyalah unggah berkas di
+menu **Media**; halaman tersebut menampilkan pemberitahuan yang jelas, dan
+kolom gambar tetap menerima URL dari sumber lain.
+
+Untuk mengaktifkannya:
+
+1. Cloudflare Dashboard → **R2** → **Enable** (paket gratis, tanpa kartu).
+2. Buat bucket-nya:
+   ```bash
+   npx wrangler r2 bucket create rac-media
+   ```
+3. Hapus tanda `#` pada tiga baris `[[r2_buckets]]` di `wrangler.toml`.
+4. *Deploy* ulang: `npm run deploy`.
 
 *Batas paket gratis: 10 GB penyimpanan, tanpa biaya keluar (egress).*
-
----
 
 ## 3. Setel *secret* produksi
 
@@ -148,6 +146,10 @@ dan pembatasan laju.
 ---
 
 ## 4. Terapkan migrasi dan *deploy*
+
+Migrasi `0001_init.sql` **sudah dijalankan** pada `rac-db`, jadi perintah di
+bawah akan melaporkan "no migrations to apply". Tetap jalankan — perintah ini
+aman diulang dan menjadi kebiasaan yang benar untuk migrasi berikutnya.
 
 ```bash
 npx wrangler d1 migrations apply rac-db --remote
@@ -181,24 +183,45 @@ Lalu *deploy* ulang: `npm run deploy`.
 
 ---
 
-## 6. Aktifkan *deploy* otomatis dari GitHub
+## 6. Deploy otomatis (Cloudflare Workers Builds)
 
-Repositori sudah menyertakan alur kerja di `.github/workflows/deploy.yml`.
-Alur ini memeriksa tipe, membangun, menjalankan migrasi, lalu *deploy* pada
-setiap dorongan (*push*) ke `main`.
+Repositori ini **sudah terhubung** ke Cloudflare Workers Builds. Setiap dorongan
+ke `main` memicu build dan deploy otomatis ke Worker bernama `rac`. Tidak ada
+*secret* GitHub yang perlu disetel — Cloudflare mengakses repo lewat integrasi
+Git-nya sendiri.
 
-Anda hanya perlu menambahkan dua *secret* di GitHub
-(**Settings → Secrets and variables → Actions**):
+Setelan build yang benar (Dashboard → **Workers & Pages** → `rac` →
+**Settings** → **Build**):
 
-| Nama | Dari mana |
+| Kolom | Nilai |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare → My Profile → API Tokens → **Create Token** → templat *Edit Cloudflare Workers*, tambahkan izin **D1:Edit** |
-| `CLOUDFLARE_ACCOUNT_ID` | Terlihat di beranda Cloudflare Dashboard, atau jalankan `npx wrangler whoami` |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` |
+| Branch | `main` |
 
-Opsional, tambahkan *variable* (bukan secret) `PUBLIC_SITE_URL` bila domain
-Anda berbeda dari nilai bawaan.
+> **Migrasi database tidak ikut otomatis.** Workers Builds hanya membangun dan
+> men-*deploy*. Setiap kali Anda menambah berkas baru di `migrations/`,
+> jalankan sekali dari mesin Anda:
+>
+> ```bash
+> npx wrangler d1 migrations apply rac-db --remote
+> ```
 
----
+Pemeriksaan tipe dan build tetap berjalan di GitHub Actions
+(`.github/workflows/ci.yml`) pada setiap pull request, sehingga kesalahan
+tertangkap sebelum Cloudflare mencoba men-*deploy*.
+
+### Catatan penting soal `dist/.assetsignore`
+
+`wrangler.toml` mengarahkan pengunggah aset statis ke seluruh `dist/`, yang juga
+berisi bundel server terkompilasi di `dist/_worker.js/`. Tanpa daftar
+pengecualian, Wrangler **menolak men-*deploy* sama sekali** — dan seandainya
+dipaksa, seluruh kode server Anda akan dapat diunduh dari internet publik.
+
+Berkas `public/.assetsignore` mengurus hal ini. Astro menyalin isi `public/`
+apa adanya ke `dist/`, sehingga berkas tersebut mendarat di
+`dist/.assetsignore` tempat Wrangler mencarinya. **Jangan hapus berkas itu.**
 
 ## 7. Kirim situs ke mesin pencari
 
@@ -261,8 +284,20 @@ terpasang. Periksa dengan `npx wrangler secret list`.
 `database_id` di `wrangler.toml` masih berisi teks contoh, atau migrasi belum
 dijalankan. Jalankan `npx wrangler d1 migrations apply rac-db --remote`.
 
-**Unggahan media gagal**
-Bucket R2 belum dibuat. Jalankan `npx wrangler r2 bucket create rac-media`.
+**Unggahan media gagal / halaman Media bilang "Bucket R2 belum terhubung"**
+R2 belum diaktifkan untuk akun ini. Ikuti langkah 2c — aktifkan R2 lewat
+Dashboard, buat bucket-nya, lalu hapus komentar pada blok `[[r2_buckets]]`.
+
+**Deploy gagal: "Uploading a Pages _worker.js directory as an asset"**
+Berkas `public/.assetsignore` hilang atau tidak lagi memuat `_worker.js`.
+Kembalikan isinya, lalu `npm run build` ulang.
+
+**Deploy gagal dengan pesan soal binding atau UUID tidak valid**
+Salah satu binding di `wrangler.toml` menunjuk sumber daya yang tidak ada.
+Cocokkan `database_id`, `id` KV, dan `bucket_name` dengan apa yang benar-benar
+ada di akun Anda (`npx wrangler d1 list`, `npx wrangler kv namespace list`).
+Binding yang tidak dapat diselesaikan akan menggagalkan seluruh *deploy*, bukan
+hanya fitur yang memakainya.
 
 **Perubahan tidak muncul di situs**
 Tekan **Bersihkan Cache** pada halaman Ringkasan dashboard. Bila memakai
