@@ -1,0 +1,32 @@
+---
+import type { Locale } from '../i18n/config';
+import { pick } from '../i18n/ui';
+import type { Testimonial } from '../lib/types';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  testimonial: Testimonial;
+}
+
+const { locale, testimonial } = Astro.props;
+---
+
+<figure class="card reveal flex h-full flex-col p-7">
+  <Icon name="quote" size={30} filled class="text-brand-600/25" />
+  <blockquote class="mt-4 flex-1 text-[0.9375rem] leading-relaxed text-steel-500">
+    {pick(testimonial.quote, locale)}
+  </blockquote>
+  <figcaption class="mt-6 flex items-center gap-3 border-t border-steel-100 pt-5">
+    <span
+      class="flex h-11 w-11 flex-none items-center justify-center bg-navy-800 font-display text-sm font-bold text-white"
+      aria-hidden="true"
+    >{testimonial.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>
+    <span class="min-w-0">
+      <span class="block text-sm font-semibold text-navy-800">{testimonial.name}</span>
+      <span class="block truncate text-[0.8125rem] text-steel-300">
+        {pick(testimonial.role, locale)} · {testimonial.company}
+      </span>
+    </span>
+  </figcaption>
+</figure>

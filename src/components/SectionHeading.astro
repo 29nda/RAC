@@ -1,0 +1,39 @@
+---
+interface Props {
+  eyebrow?: string;
+  title: string;
+  intro?: string;
+  align?: 'left' | 'center';
+  tone?: 'dark' | 'light';
+  as?: 'h2' | 'h3';
+}
+
+const { eyebrow, title, intro, align = 'left', tone = 'dark', as: Tag = 'h2' } = Astro.props;
+const lines: string[] = title.split('\n');
+const centred = align === 'center';
+---
+
+<div class:list={['reveal', centred && 'mx-auto max-w-2xl text-center']}>
+  {eyebrow && (
+    <p class:list={['eyebrow mb-4', centred && 'eyebrow-center justify-center']}>{eyebrow}</p>
+  )}
+
+  <Tag class:list={[
+    'text-2xl sm:text-3xl lg:text-[2.125rem]',
+    tone === 'light' ? 'text-white' : 'text-navy-800',
+  ]}>
+    {lines.map((line, index) => (
+      <>{index > 0 && <br />}{line}</>
+    ))}
+  </Tag>
+
+  <div class:list={['rule-accent mt-5', centred && 'mx-auto']}></div>
+
+  {intro && (
+    <p class:list={[
+      'mt-5 text-base leading-relaxed',
+      tone === 'light' ? 'text-white/70' : 'text-steel-400',
+      !centred && 'max-w-2xl',
+    ]}>{intro}</p>
+  )}
+</div>

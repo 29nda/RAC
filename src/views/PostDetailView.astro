@@ -1,0 +1,183 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick, formatDate } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { findPost, publishedPosts } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, articleSchema, organizationSchema, absoluteUrl } from '../lib/seo';
+import { sanitizeHtml } from '../lib/security';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import PostCard from '../components/PostCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+  slug: string;
+}
+
+const { locale, content, slug } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const site = getSiteUrl(Astro.locals);
+
+const post = findPost(content, slug)!;
+const related = publishedPosts(content).filter((x) => x.slug !== slug).slice(0, 3);
+
+const title = pick(post.title, locale);
+const canonical = absoluteUrl(site, localizedPath('blog', locale, slug));
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.blog'), path: localizedPath('blog', locale) },
+  { name: title, path: localizedPath('blog', locale, slug) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+  articleSchema(site, post, locale),
+]);
+
+const shareLinks = [
+  {
+    label: 'WhatsApp',
+    icon: 'whatsapp' as const,
+    href: `https://wa.me/?text=${encodeURIComponent(`${title} — ${canonical}`)}`,
+  },
+  {
+    label: 'LinkedIn',
+    icon: 'linkedin' as const,
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(canonical)}`,
+  },
+  {
+    label: 'Facebook',
+    icon: 'facebook' as const,
+    href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}`,
+  },
+];
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="blog"
+  slug={slug}
+  content={content}
+  title={pick(post.metaTitle, locale) || `${title} · ${s.brandName}`}
+  description={pick(post.metaDescription, locale) || pick(post.excerpt, locale)}
+  jsonLd={jsonLd}
+  image={post.image}
+  imageAlt={pick(post.imageAlt, locale)}
+  ogType="article"
+  publishedTime={post.publishedAt}
+  modifiedTime={post.updatedAt ?? post.publishedAt}
+  whatsappSubject={title}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(post.category, locale)}
+    title={title}
+    trail={trail}
+    compact
+  >
+    <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.8125rem] text-white/60">
+      <span>{post.author}</span>
+      <time datetime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>
+      <span class="flex items-center gap-1.5">
+        <Icon name="clock" size={14} />{post.readingMinutes} {t('label.readTime')}
+      </span>
+    </div>
+  </PageHero>
+
+  <section class="py-14 lg:py-20">
+    <div class="container-rac">
+      <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <article class="lg:col-span-8">
+          <p class="border-l-4 border-brand-600 pl-5 text-lg leading-relaxed text-navy-700">
+            {pick(post.excerpt, locale)}
+          </p>
+
+          <div class="prose-rac mt-10" set:html={sanitizeHtml(pick(post.body, locale))} />
+
+          {post.tags.length > 0 && (
+            <ul class="mt-12 flex flex-wrap gap-2 border-t border-steel-100 pt-8">
+              {post.tags.map((tag) => (
+                <li class="border border-steel-100 bg-steel-50 px-2.5 py-1 text-[0.75rem] text-steel-400">
+                  #{tag}
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+
+        <aside class="lg:col-span-4">
+          <div class="sticky top-[calc(var(--header-h)+1.5rem)] space-y-5">
+            <div class="card p-6">
+              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+                {t('label.share')}
+              </h2>
+              <ul class="mt-4 flex gap-2.5">
+                {shareLinks.map((link) => (
+                  <li>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex h-11 w-11 items-center justify-center border border-steel-100 text-steel-400 transition-colors hover:border-brand-600 hover:bg-brand-600 hover:text-white"
+                      aria-label={`${t('label.share')} — ${link.label}`}
+                    >
+                      <Icon name={link.icon} size={18} filled={link.icon === 'whatsapp'} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div class="bg-navy-800 p-6 text-white">
+              <Icon name="graduation-cap" size={26} class="text-brand-500" />
+              <h2 class="mt-4 text-base">
+                {locale === 'id' ? 'Ingin Bersertifikat?' : 'Want to Get Certified?'}
+              </h2>
+              <p class="mt-2.5 text-[0.8125rem] leading-relaxed text-white/65">
+                {locale === 'id'
+                  ? 'Lihat program pelatihan akses tali kami — dari nol pengalaman hingga supervisor.'
+                  : 'See our rope access training programmes — from zero experience to supervisor.'}
+              </p>
+              <a href={localizedPath('training', locale)} class="btn btn-primary btn-block mt-5">
+                {t('cta.explore')}
+                <Icon name="arrow-right" size={15} />
+              </a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="bg-steel-50 py-16 lg:py-20">
+      <div class="container-rac">
+        <SectionHeading
+          eyebrow={locale === 'id' ? 'Bacaan Lain' : 'Further Reading'}
+          title={t('section.related')}
+        />
+        <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {related.map((item) => <PostCard locale={locale} post={item} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Punya pertanyaan lanjutan?' : 'A follow-up question?'}
+    title={locale === 'id' ? 'Tanyakan Langsung\nkepada Instruktur Kami.' : 'Ask Our Instructors\nDirectly.'}
+    subject={title}
+  />
+</SiteLayout>

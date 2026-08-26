@@ -1,0 +1,229 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick, formatDateShort } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { findCourse, publishedCourses, upcomingSchedule } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, courseSchema, organizationSchema } from '../lib/seo';
+import { sanitizeHtml } from '../lib/security';
+import { whatsappUrl } from '../lib/whatsapp';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import CourseCard from '../components/CourseCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+  slug: string;
+}
+
+const { locale, content, slug } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const site = getSiteUrl(Astro.locals);
+
+const course = findCourse(content, slug)!;
+const sessions = upcomingSchedule(content).filter((x) => x.courseSlug === slug);
+const related = publishedCourses(content).filter((x) => x.slug !== slug).slice(0, 3);
+
+const title = pick(course.title, locale);
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.training'), path: localizedPath('training', locale) },
+  { name: title, path: localizedPath('training', locale, slug) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+  courseSchema(site, course, locale, s, sessions),
+]);
+
+const wa = whatsappUrl(s, locale, { subject: title, sourceUrl: Astro.url.href });
+
+const STATUS_TONE: Record<string, string> = {
+  open: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  limited: 'bg-amber-50 text-amber-700 border-amber-200',
+  full: 'bg-steel-100 text-steel-400 border-steel-200',
+  request: 'bg-navy-50 text-navy-700 border-navy-200',
+};
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="training"
+  slug={slug}
+  content={content}
+  title={pick(course.metaTitle, locale) || `${title} · ${s.brandName}`}
+  description={pick(course.metaDescription, locale) || pick(course.summary, locale)}
+  jsonLd={jsonLd}
+  image={course.ogImage}
+  whatsappSubject={title}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={`${course.scheme} · ${course.level}`}
+    title={title}
+    subtitle={pick(course.summary, locale)}
+    trail={trail}
+  >
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href={wa} class="btn btn-whatsapp" target="_blank" rel="noopener" data-wa-cta="course-hero">
+        <Icon name="whatsapp" size={17} filled />
+        {t('cta.enroll')}
+      </a>
+      <a href={localizedPath('schedule', locale)} class="btn btn-ghost-light">
+        {t('nav.schedule')}
+        <Icon name="calendar" size={16} />
+      </a>
+    </div>
+  </PageHero>
+
+  <section class="py-14 lg:py-20">
+    <div class="container-rac">
+      <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <!-- Main column -->
+        <div class="lg:col-span-8">
+          <h2 class="text-xl text-navy-800 lg:text-2xl">
+            {locale === 'id' ? 'Yang Akan Anda Kuasai' : 'What You Will Master'}
+          </h2>
+          <div class="rule-accent mt-4"></div>
+          <ul class="mt-6 space-y-3">
+            {course.outcomes[locale].map((outcome) => (
+              <li class="flex gap-3 text-[0.9375rem] leading-relaxed text-steel-500">
+                <Icon name="check" size={18} class="mt-0.5 flex-none text-brand-600" />
+                <span>{outcome}</span>
+              </li>
+            ))}
+          </ul>
+
+          <h2 class="mt-14 text-xl text-navy-800 lg:text-2xl">
+            {locale === 'id' ? 'Silabus' : 'Syllabus'}
+          </h2>
+          <div class="rule-accent mt-4"></div>
+          <ol class="mt-6 space-y-0 border-l-2 border-steel-100">
+            {course.syllabus.map((item, index) => (
+              <li class="relative pb-7 pl-7 last:pb-0">
+                <span
+                  class="absolute -left-[0.5625rem] top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-brand-600 bg-white"
+                  aria-hidden="true"
+                ></span>
+                <h3 class="text-[0.9375rem] text-navy-800">
+                  <span class="mr-2 font-display text-brand-600">{String(index + 1).padStart(2, '0')}</span>
+                  {pick(item.title, locale)}
+                </h3>
+                <p class="mt-2 text-[0.9375rem] leading-relaxed text-steel-400">
+                  {pick(item.detail, locale)}
+                </p>
+              </li>
+            ))}
+          </ol>
+
+          {pick(course.body, locale) && (
+            <div class="prose-rac mt-14" set:html={sanitizeHtml(pick(course.body, locale))} />
+          )}
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="lg:col-span-4">
+          <div class="sticky top-[calc(var(--header-h)+1.5rem)] space-y-5">
+            <div class="card p-6">
+              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+                {locale === 'id' ? 'Ringkasan Program' : 'Programme Summary'}
+              </h2>
+              <dl class="mt-5 space-y-4 text-sm">
+                {[
+                  { icon: 'clock', label: t('label.duration'), value: pick(course.duration, locale) },
+                  { icon: 'layers', label: t('label.level'), value: course.level },
+                  { icon: 'certificate', label: t('label.certificate'), value: pick(course.certificate, locale) },
+                  { icon: 'briefcase', label: t('label.price'), value: pick(course.price, locale) },
+                ].map((row) => (
+                  <div class="flex gap-3 border-b border-steel-100 pb-4 last:border-0 last:pb-0">
+                    <Icon name={row.icon as 'clock'} size={17} class="mt-0.5 flex-none text-brand-600" />
+                    <div>
+                      <dt class="text-[0.6875rem] uppercase tracking-[0.1em] text-steel-300">{row.label}</dt>
+                      <dd class="mt-1 leading-relaxed text-navy-800">{row.value}</dd>
+                    </div>
+                  </div>
+                ))}
+              </dl>
+
+              <a href={wa} class="btn btn-whatsapp btn-block mt-6" target="_blank" rel="noopener" data-wa-cta="course-sidebar">
+                <Icon name="whatsapp" size={17} filled />
+                {t('cta.enroll')}
+              </a>
+              <a href={localizedPath('contact', locale)} class="btn btn-ghost-dark btn-block mt-3">
+                {t('cta.quote')}
+              </a>
+            </div>
+
+            <div class="card p-6">
+              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+                {t('label.prereq')}
+              </h2>
+              <ul class="mt-4 space-y-2.5">
+                {course.prerequisites[locale].map((item) => (
+                  <li class="flex gap-2.5 text-[0.8125rem] leading-relaxed text-steel-400">
+                    <Icon name="check-circle" size={15} class="mt-0.5 flex-none text-steel-300" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {sessions.length > 0 && (
+              <div class="card p-6">
+                <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+                  {locale === 'id' ? 'Jadwal Terdekat' : 'Next Dates'}
+                </h2>
+                <ul class="mt-4 space-y-3">
+                  {sessions.slice(0, 4).map((session) => (
+                    <li class="flex items-center justify-between gap-3 border-b border-steel-100 pb-3 last:border-0 last:pb-0">
+                      <div>
+                        <p class="text-[0.8125rem] font-semibold text-navy-800">
+                          {formatDateShort(session.startDate, locale)}
+                        </p>
+                        <p class="text-[0.75rem] text-steel-300">{pick(session.location, locale)}</p>
+                      </div>
+                      <span class:list={[
+                        'flex-none border px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-wide',
+                        STATUS_TONE[session.status],
+                      ]}>{t(`status.${session.status}` as 'status.open')}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="bg-steel-50 py-16 lg:py-20">
+      <div class="container-rac">
+        <SectionHeading
+          eyebrow={locale === 'id' ? 'Program Lain' : 'Other Programmes'}
+          title={t('section.related')}
+        />
+        <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {related.map((item) => <CourseCard locale={locale} course={item} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Siap memulai?' : 'Ready to begin?'}
+    title={locale === 'id' ? 'Amankan Kursi Anda\nuntuk Angkatan Berikutnya.' : 'Secure Your Seat\nin the Next Cohort.'}
+    subject={title}
+  />
+</SiteLayout>

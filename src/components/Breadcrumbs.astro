@@ -1,0 +1,33 @@
+---
+import type { Locale } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  trail: Array<{ name: string; path: string }>;
+  variant?: 'dark' | 'light';
+}
+
+const { locale, trail, variant = 'dark' } = Astro.props;
+const t = useTranslations(locale);
+
+const tone = variant === 'dark'
+  ? { muted: 'text-white/50', link: 'hover:text-white', current: 'text-white/85' }
+  : { muted: 'text-steel-300', link: 'hover:text-navy-800', current: 'text-navy-800' };
+---
+
+<nav aria-label={t('meta.breadcrumb')} class="text-[0.8125rem]">
+  <ol class:list={['flex flex-wrap items-center gap-x-1.5 gap-y-1', tone.muted]}>
+    {trail.map((item, index) => (
+      <li class="flex items-center gap-1.5">
+        {index > 0 && <Icon name="chevron-right" size={13} class="opacity-50" />}
+        {index === trail.length - 1 ? (
+          <span class:list={[tone.current]} aria-current="page">{item.name}</span>
+        ) : (
+          <a href={item.path} class:list={['transition-colors', tone.link]}>{item.name}</a>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>

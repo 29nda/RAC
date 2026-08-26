@@ -1,0 +1,140 @@
+---
+import '../styles/global.css';
+import type { Locale, RouteKey } from '../i18n/config';
+import { LOCALE_META, localizedPath } from '../i18n/config';
+import { alternateLinks, absoluteUrl } from '../lib/seo';
+import { getSiteUrl } from '../lib/env';
+import type { SiteSettings } from '../lib/types';
+
+interface Props {
+  locale: Locale;
+  routeKey: RouteKey;
+  slug?: string;
+  title: string;
+  description: string;
+  settings: SiteSettings;
+  /** Serialised JSON-LD `@graph` for this page. */
+  jsonLd?: string;
+  image?: string;
+  imageAlt?: string;
+  noindex?: boolean;
+  ogType?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  bodyClass?: string;
+}
+
+const {
+  locale, routeKey, slug, title, description, settings,
+  jsonLd, image, imageAlt, noindex = false,
+  ogType = 'website', publishedTime, modifiedTime, bodyClass = '',
+} = Astro.props;
+
+const site = getSiteUrl(Astro.locals);
+const meta = LOCALE_META[locale];
+const canonical = absoluteUrl(site, localizedPath(routeKey, locale, slug));
+const alternates = alternateLinks(site, routeKey, slug);
+const ogImage = absoluteUrl(site, image ?? '/brand/og-default.png');
+const nonce = Astro.locals.cspNonce;
+
+// Trimmed to the lengths search engines actually render.
+const metaTitle = title.length > 62 ? `${title.slice(0, 59).trimEnd()}…` : title;
+const metaDescription = description.length > 158
+  ? `${description.slice(0, 155).trimEnd()}…`
+  : description;
+---
+
+<!doctype html>
+<html lang={meta.htmlLang} dir={meta.dir} class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{metaTitle}</title>
+    <meta name="description" content={metaDescription} />
+    <link rel="canonical" href={canonical} />
+
+    {noindex
+      ? <meta name="robots" content="noindex, nofollow" />
+      : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
+
+    {alternates.map((alt) => (
+      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+    ))}
+
+    <!-- Fonts are self-hosted, so preloading them removes the only remaining
+         render-blocking round trip on a cold visit. -->
+    <link rel="preload" href="/fonts/archivo-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/montserrat-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={settings.brandName} />
+    <meta property="og:locale" content={meta.ogLocale} />
+    {alternates
+      .filter((a) => a.hreflang !== 'x-default' && a.hreflang !== meta.htmlLang.toLowerCase())
+      .map((a) => <meta property="og:locale:alternate" content={a.hreflang.replace('-', '_')} />)}
+    <meta property="og:title" content={metaTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt ?? metaTitle} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={metaTitle} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <meta name="theme-color" content="#0d1b2a" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="author" content={settings.legalName} />
+    <meta name="geo.region" content="ID-JK" />
+    <meta name="geo.placename" content={settings.city} />
+    <meta name="geo.position" content={`${settings.latitude};${settings.longitude}`} />
+    <meta name="ICBM" content={`${settings.latitude}, ${settings.longitude}`} />
+
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/brand/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/brand/icon-180.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${settings.brandName} — ${locale === 'id' ? 'Artikel' : 'Insights'}`}
+      href={locale === 'id' ? '/rss.xml' : '/en/rss.xml'}
+    />
+
+    {jsonLd && <script type="application/ld+json" nonce={nonce} set:html={jsonLd} />}
+    <slot name="head" />
+  </head>
+
+  <body class={bodyClass}>
+    <slot />
+
+    <script nonce={nonce} is:inline>
+      // Progressive reveal on scroll. Written inline and dependency-free so it
+      // costs one small parse rather than a bundle round trip, and it degrades
+      // to "everything visible" wherever IntersectionObserver is missing.
+      (function () {
+        var targets = document.querySelectorAll('.reveal');
+        if (!targets.length) return;
+        if (!('IntersectionObserver' in window)) {
+          targets.forEach(function (el) { el.classList.add('is-visible'); });
+          return;
+        }
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          });
+        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+        targets.forEach(function (el) { observer.observe(el); });
+      })();
+    </script>
+  </body>
+</html>

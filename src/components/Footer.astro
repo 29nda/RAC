@@ -1,0 +1,191 @@
+---
+import type { Locale, RouteKey } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { Course, Service, SiteSettings } from '../lib/types';
+import { whatsappUrl, telUrl, mailtoUrl } from '../lib/whatsapp';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  settings: SiteSettings;
+  courses: Course[];
+  services: Service[];
+}
+
+const { locale, settings, courses, services } = Astro.props;
+const t = useTranslations(locale);
+const year = new Date().getFullYear();
+
+const socials = [
+  { key: 'facebook', href: settings.social.facebook, icon: 'facebook' },
+  { key: 'instagram', href: settings.social.instagram, icon: 'instagram' },
+  { key: 'linkedin', href: settings.social.linkedin, icon: 'linkedin' },
+  { key: 'youtube', href: settings.social.youtube, icon: 'youtube' },
+].filter((s): s is { key: string; href: string; icon: 'facebook' } => Boolean(s.href));
+
+const companyLinks: Array<{ href: string; label: string }> = [
+  { href: localizedPath('about', locale), label: t('nav.about') },
+  { href: localizedPath('certification', locale), label: t('nav.certification') },
+  { href: localizedPath('blog', locale), label: t('nav.blog') },
+  { href: localizedPath('faq', locale), label: t('nav.faq') },
+];
+
+const legalLinks: Array<{ href: string; label: string }> = [
+  { href: localizedPath('privacy', locale), label: locale === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy' },
+  { href: localizedPath('terms', locale), label: locale === 'id' ? 'Syarat & Ketentuan' : 'Terms & Conditions' },
+  { href: '/sitemap.xml', label: t('footer.sitemap') },
+];
+---
+
+<footer class="bg-navy-800 text-white/70">
+  <div class="container-rac py-14 lg:py-16">
+    <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+      <!-- Brand -->
+      <div class="lg:col-span-4">
+        <img
+          src="/brand/logo-onDark-240.webp"
+          srcset="/brand/logo-onDark-240.webp 240w, /brand/logo-onDark-360.webp 360w"
+          sizes="176px"
+          width="176"
+          height="91"
+          alt={`${settings.brandName} logo`}
+          class="h-14 w-auto"
+          loading="lazy"
+          decoding="async"
+        />
+        <p class="mt-5 max-w-sm text-sm leading-relaxed">
+          {pick(settings.description, locale)}
+        </p>
+
+        {socials.length > 0 && (
+          <div class="mt-6">
+            <p class="font-display text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-white/40">
+              {t('footer.follow')}
+            </p>
+            <ul class="mt-3 flex gap-2.5">
+              {socials.map((social) => (
+                <li>
+                  <a
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer me"
+                    class="inline-flex h-10 w-10 items-center justify-center border border-white/15 text-white/70 transition-colors hover:border-brand-600 hover:bg-brand-600 hover:text-white"
+                    aria-label={social.key}
+                  >
+                    <Icon name={social.icon} size={18} />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      <!-- Training -->
+      <nav class="lg:col-span-2" aria-labelledby="footer-training">
+        <h2 id="footer-training" class="font-display text-[0.8125rem] font-bold uppercase tracking-[0.14em] text-white">
+          {t('footer.training')}
+        </h2>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {courses.slice(0, 5).map((course) => (
+            <li>
+              <a href={localizedPath('training', locale, course.slug)} class="transition-colors hover:text-white">
+                {pick(course.title, locale)}
+              </a>
+            </li>
+          ))}
+          <li>
+            <a href={localizedPath('schedule', locale)} class="transition-colors hover:text-white">
+              {t('nav.schedule')}
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Services -->
+      <nav class="lg:col-span-3" aria-labelledby="footer-services">
+        <h2 id="footer-services" class="font-display text-[0.8125rem] font-bold uppercase tracking-[0.14em] text-white">
+          {t('footer.services')}
+        </h2>
+        <ul class="mt-4 space-y-2.5 text-sm">
+          {services.slice(0, 6).map((service) => (
+            <li>
+              <a href={localizedPath('services', locale, service.slug)} class="transition-colors hover:text-white">
+                {pick(service.title, locale)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- Contact -->
+      <div class="lg:col-span-3">
+        <h2 class="font-display text-[0.8125rem] font-bold uppercase tracking-[0.14em] text-white">
+          {t('footer.contact')}
+        </h2>
+        <ul class="mt-4 space-y-3.5 text-sm">
+          <li class="flex gap-3">
+            <Icon name="whatsapp" size={17} filled class="mt-0.5 flex-none text-brand-500" />
+            <a
+              href={whatsappUrl(settings, locale)}
+              target="_blank"
+              rel="noopener"
+              class="transition-colors hover:text-white"
+            >
+              {settings.phoneDisplay}
+            </a>
+          </li>
+          <li class="flex gap-3">
+            <Icon name="phone" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <a href={telUrl(settings)} class="transition-colors hover:text-white">
+              {settings.phoneDisplay}
+            </a>
+          </li>
+          <li class="flex gap-3">
+            <Icon name="mail" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <a href={mailtoUrl(settings)} class="break-all transition-colors hover:text-white">
+              {settings.email}
+            </a>
+          </li>
+          <li class="flex gap-3">
+            <Icon name="map-pin" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <address class="not-italic leading-relaxed">
+              {pick(settings.addressLine, locale)}<br />
+              {settings.city} {settings.postalCode}, Indonesia
+            </address>
+          </li>
+          <li class="flex gap-3">
+            <Icon name="clock" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <span class="leading-relaxed">{pick(settings.openingHours, locale)}</span>
+          </li>
+        </ul>
+
+        <nav class="mt-6" aria-label={t('footer.company')}>
+          <ul class="flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
+            {companyLinks.map((link) => (
+              <li>
+                <a href={link.href} class="transition-colors hover:text-white">{link.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-white/10">
+    <div class="container-rac flex flex-col gap-3 py-5 text-[0.8125rem] sm:flex-row sm:items-center sm:justify-between">
+      <p>© {year} {settings.legalName}. {t('footer.rights')}</p>
+      <nav aria-label={t('footer.legal')}>
+        <ul class="flex flex-wrap gap-x-5 gap-y-1">
+          {legalLinks.map((link) => (
+            <li>
+              <a href={link.href} class="transition-colors hover:text-white">{link.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </div>
+</footer>

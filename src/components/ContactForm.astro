@@ -1,0 +1,210 @@
+---
+import type { Locale } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import { getEnv } from '../lib/env';
+import { issueFormToken } from '../lib/formToken';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  /** Pre-selects the enquiry subject, e.g. when linked from a course page. */
+  defaultSubject?: string;
+}
+
+const { locale, defaultSubject } = Astro.props;
+const t = useTranslations(locale);
+const nonce = Astro.locals.cspNonce;
+const env = getEnv(Astro.locals);
+const turnstileKey = env.PUBLIC_TURNSTILE_SITE_KEY;
+// Identical for every visitor within the hour, so the page stays cacheable.
+const formToken = await issueFormToken(env.SESSION_SECRET);
+
+const SUBJECTS = [
+  { value: 'training', label: { id: 'Pelatihan & Sertifikasi', en: 'Training & Certification' } },
+  { value: 'services', label: { id: 'Jasa Akses Tali', en: 'Rope Access Services' } },
+  { value: 'inhouse', label: { id: 'Pelatihan In-House', en: 'In-House Training' } },
+  { value: 'audit', label: { id: 'Konsultasi & Audit K3', en: 'HSE Consulting & Audit' } },
+  { value: 'other', label: { id: 'Lainnya', en: 'Something else' } },
+];
+
+const field = 'w-full border border-steel-200 bg-white px-4 py-3 text-sm text-navy-800 transition-colors placeholder:text-steel-300 focus:border-navy-800 focus:outline-none';
+const label = 'mb-2 block text-[0.8125rem] font-semibold text-navy-800';
+---
+
+<form id="contact-form" method="post" action="/api/contact" novalidate class="space-y-5">
+  <input type="hidden" name="ft" value={formToken} />
+  <input type="hidden" name="locale" value={locale} />
+  <input type="hidden" name="pageUrl" value={Astro.url.pathname} />
+
+  <!-- Honeypot: invisible to people, irresistible to naive bots. -->
+  <div class="absolute h-0 w-0 overflow-hidden" aria-hidden="true">
+    <label for="company_website">Company website</label>
+    <input type="text" id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label class={label} for="name">
+        {t('form.name')} <span class="text-brand-600" aria-hidden="true">*</span>
+      </label>
+      <input class={field} type="text" id="name" name="name" required maxlength="120" autocomplete="name" />
+    </div>
+    <div>
+      <label class={label} for="phone">
+        {t('form.phone')} <span class="text-brand-600" aria-hidden="true">*</span>
+      </label>
+      <input
+        class={field}
+        type="tel"
+        id="phone"
+        name="phone"
+        required
+        maxlength="24"
+        autocomplete="tel"
+        inputmode="tel"
+        placeholder="0812 3456 7890"
+      />
+    </div>
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div>
+      <label class={label} for="email">
+        {t('form.email')} <span class="text-brand-600" aria-hidden="true">*</span>
+      </label>
+      <input class={field} type="email" id="email" name="email" required maxlength="254" autocomplete="email" />
+    </div>
+    <div>
+      <label class={label} for="company">
+        {t('form.company')} <span class="font-normal text-steel-300">({t('label.optional')})</span>
+      </label>
+      <input class={field} type="text" id="company" name="company" maxlength="140" autocomplete="organization" />
+    </div>
+  </div>
+
+  <div>
+    <label class={label} for="subject">{t('form.subject')}</label>
+    <select class={field} id="subject" name="subject">
+      {SUBJECTS.map((option) => (
+        <option value={option.value} selected={defaultSubject === option.value}>
+          {option.label[locale]}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  <div>
+    <label class={label} for="message">
+      {t('form.message')} <span class="text-brand-600" aria-hidden="true">*</span>
+    </label>
+    <textarea
+      class={field}
+      id="message"
+      name="message"
+      rows="5"
+      required
+      maxlength="2000"
+      placeholder={t('form.placeholderMessage')}
+    ></textarea>
+  </div>
+
+  <label class="flex cursor-pointer items-start gap-3 text-[0.8125rem] leading-relaxed text-steel-400">
+    <input
+      type="checkbox"
+      name="consent"
+      required
+      class="mt-0.5 h-4 w-4 flex-none accent-[#e30613]"
+    />
+    <span>{t('form.consent')}</span>
+  </label>
+
+  {turnstileKey && (
+    <div class="cf-turnstile" data-sitekey={turnstileKey} data-theme="light" data-size="flexible"></div>
+  )}
+
+  <button type="submit" class="btn btn-primary btn-block" data-submit>
+    <span data-submit-label>{t('form.send')}</span>
+    <Icon name="arrow-right" size={16} />
+  </button>
+
+  <p
+    id="form-status"
+    class="hidden text-sm leading-relaxed"
+    role="status"
+    aria-live="polite"
+  ></p>
+</form>
+
+{turnstileKey && (
+  <script
+    is:inline
+    nonce={nonce}
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer
+  ></script>
+)}
+
+<script nonce={nonce} is:inline define:vars={{ successText: t('form.success'), errorText: t('form.error'), sendingText: t('form.sending'), sendText: t('form.send') }}>
+  (function () {
+    var form = document.getElementById('contact-form');
+    if (!form) return;
+
+    var status = document.getElementById('form-status');
+    var button = form.querySelector('[data-submit]');
+    var buttonLabel = form.querySelector('[data-submit-label]');
+
+    function show(message, ok) {
+      if (!status) return;
+      status.textContent = message;
+      status.classList.remove('hidden');
+      status.style.color = ok ? '#15803d' : '#bf0510';
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      button.disabled = true;
+      button.style.opacity = '0.65';
+      if (buttonLabel) buttonLabel.textContent = sendingText;
+
+      fetch('/api/contact', {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+      })
+        .then(function (response) {
+          return response.json().then(function (data) {
+            return { ok: response.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (result.ok && result.data.ok) {
+            show(successText, true);
+            form.reset();
+            if (result.data.whatsapp) {
+              window.setTimeout(function () {
+                window.open(result.data.whatsapp, '_blank', 'noopener');
+              }, 900);
+            }
+          } else {
+            show(result.data && result.data.message ? result.data.message : errorText, false);
+          }
+        })
+        .catch(function () {
+          show(errorText, false);
+        })
+        .finally(function () {
+          button.disabled = false;
+          button.style.opacity = '';
+          if (buttonLabel) buttonLabel.textContent = sendText;
+          if (window.turnstile) window.turnstile.reset();
+        });
+    });
+  })();
+</script>

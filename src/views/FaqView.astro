@@ -1,0 +1,120 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent, Faq } from '../lib/types';
+import { getPage, publishedFaqs } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, faqSchema, organizationSchema } from '../lib/seo';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'faq');
+const site = getSiteUrl(Astro.locals);
+
+const faqs = publishedFaqs(content);
+
+const GROUP_LABELS: Record<Faq['group'], Record<Locale, string>> = {
+  general: { id: 'Umum', en: 'General' },
+  training: { id: 'Pelatihan', en: 'Training' },
+  certification: { id: 'Sertifikasi', en: 'Certification' },
+  services: { id: 'Layanan', en: 'Services' },
+};
+
+const groups = (['general', 'training', 'certification', 'services'] as const)
+  .map((group) => ({
+    group,
+    label: pick(GROUP_LABELS[group], locale),
+    items: faqs.filter((faq) => faq.group === group),
+  }))
+  .filter((section) => section.items.length > 0);
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.faq'), path: localizedPath('faq', locale) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+  faqSchema(faqs, locale),
+]);
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="faq"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={pick(page.heroTitle, locale)}
+    subtitle={pick(page.heroSubtitle, locale)}
+    trail={trail}
+  />
+
+  <section class="py-14 lg:py-20">
+    <div class="container-rac">
+      <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <!-- Section index — doubles as an in-page table of contents for crawlers -->
+        <nav class="lg:col-span-3" aria-label={locale === 'id' ? 'Kategori FAQ' : 'FAQ categories'}>
+          <div class="sticky top-[calc(var(--header-h)+1.5rem)]">
+            <p class="font-display text-[0.6875rem] uppercase tracking-[0.16em] text-steel-300">
+              {t('label.category')}
+            </p>
+            <ul class="mt-4 space-y-1 border-l border-steel-100">
+              {groups.map((section) => (
+                <li>
+                  <a
+                    href={`#faq-${section.group}`}
+                    class="-ml-px block border-l-2 border-transparent py-2 pl-4 text-sm text-steel-400 transition-colors hover:border-brand-600 hover:text-navy-800"
+                  >
+                    {section.label}
+                    <span class="ml-1.5 text-[0.75rem] text-steel-300">({section.items.length})</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+
+        <div class="space-y-14 lg:col-span-9">
+          {groups.map((section) => (
+            <section id={`faq-${section.group}`} aria-labelledby={`heading-${section.group}`}>
+              <h2 id={`heading-${section.group}`} class="text-xl text-navy-800 lg:text-2xl">
+                {section.label}
+              </h2>
+              <div class="rule-accent mt-4 mb-6"></div>
+              <FaqAccordion locale={locale} faqs={section.items} openFirst={false} />
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Belum terjawab?' : 'Still unanswered?'}
+    title={locale === 'id'
+      ? 'Kirim Pertanyaan Anda,\nKami Balas Hari Kerja Ini.'
+      : 'Send Your Question,\nWe Reply This Working Day.'}
+    subject={locale === 'id' ? 'pertanyaan yang belum terjawab di FAQ' : 'a question not covered in the FAQ'}
+  />
+</SiteLayout>

@@ -1,0 +1,366 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   RAC — Rope Access Center · Design tokens
+   Derived from the official brand guidelines sheet (see docs/brand-guidelines.webp)
+   ========================================================================== */
+
+@theme {
+  /* --- Brand ------------------------------------------------------------ */
+  --color-navy-50:  #eef2f7;
+  --color-navy-100: #d6dfeb;
+  --color-navy-200: #adbfd6;
+  --color-navy-300: #7b95b8;
+  --color-navy-400: #4a6a94;
+  --color-navy-500: #2a4467;
+  --color-navy-600: #1a2f4d;
+  --color-navy-700: #12233b;
+  --color-navy-800: #0d1b2a; /* NAVY — primary */
+  --color-navy-900: #091320;
+  --color-navy-950: #050b13;
+
+  --color-brand-50:  #fef2f3;
+  --color-brand-100: #fde3e5;
+  --color-brand-200: #fbccd0;
+  --color-brand-300: #f7a3aa;
+  --color-brand-400: #f16b78;
+  --color-brand-500: #e63c4c;
+  --color-brand-600: #e30613; /* RED — accent */
+  --color-brand-700: #bf0510;
+  --color-brand-800: #9d0812;
+  --color-brand-900: #820d15;
+
+  --color-charcoal: #222529;
+
+  --color-steel-50:  #f2f4f7;
+  --color-steel-100: #e6e9ef;
+  --color-steel-200: #d1d5db;
+  --color-steel-300: #9ca3af;
+  --color-steel-400: #6b7177;
+  --color-steel-500: #4b4f56;
+  --color-steel-600: #3a3e44;
+
+  /* --- Typography ------------------------------------------------------- */
+  --font-display: 'Archivo', 'Arial Black', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease-out-brand: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Layout ----------------------------------------------------------- */
+  --spacing-gutter: 1.25rem;
+}
+
+/* ==========================================================================
+   Self-hosted variable fonts (no third-party requests — keeps CSP tight)
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100% 125%;
+  font-display: swap;
+  src: url('/fonts/archivo-latin-var.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/montserrat-latin-var.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  :root {
+    --header-h: 4.5rem;
+    color-scheme: light;
+  }
+
+  * {
+    min-width: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--header-h) + 1rem);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    font-stretch: 118%;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  p, li {
+    text-wrap: pretty;
+  }
+
+  /* Visible, brand-coloured focus ring for keyboard users */
+  :focus-visible {
+    outline: 3px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-600);
+    color: #fff;
+  }
+
+  img, svg, video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Prevent CLS while lazily-loaded media resolves */
+  img[width][height] {
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Components
+   ========================================================================== */
+
+@layer components {
+  .container-rac {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: var(--spacing-gutter);
+    max-width: 80rem;
+  }
+
+  @media (min-width: 640px) {
+    .container-rac { --spacing-gutter: 2rem; }
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-stretch: 112%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-brand-600);
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 1.5rem;
+    height: 3px;
+    background-color: var(--color-brand-600);
+    flex: none;
+  }
+
+  .eyebrow-center::before { display: none; }
+
+  .rule-accent {
+    width: 3.5rem;
+    height: 4px;
+    background-color: var(--color-brand-600);
+  }
+
+  /* --- Buttons ---------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1.5rem;
+    font-family: var(--font-display);
+    font-stretch: 112%;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    border: 2px solid transparent;
+    transition: background-color 0.2s var(--ease-out-brand),
+                color 0.2s var(--ease-out-brand),
+                border-color 0.2s var(--ease-out-brand),
+                transform 0.2s var(--ease-out-brand);
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .btn:active { transform: translateY(1px); }
+  .btn svg { flex: none; transition: transform 0.25s var(--ease-out-brand); }
+  .btn:hover svg { transform: translateX(3px); }
+
+  .btn-primary {
+    background-color: var(--color-brand-600);
+    color: #fff;
+    border-color: var(--color-brand-600);
+  }
+  .btn-primary:hover {
+    background-color: var(--color-brand-700);
+    border-color: var(--color-brand-700);
+  }
+
+  .btn-ghost-light {
+    background-color: transparent;
+    color: #fff;
+    border-color: rgb(255 255 255 / 0.35);
+  }
+  .btn-ghost-light:hover {
+    background-color: #fff;
+    color: var(--color-navy-800);
+    border-color: #fff;
+  }
+
+  .btn-ghost-dark {
+    background-color: transparent;
+    color: var(--color-navy-800);
+    border-color: var(--color-steel-200);
+  }
+  .btn-ghost-dark:hover {
+    background-color: var(--color-navy-800);
+    color: #fff;
+    border-color: var(--color-navy-800);
+  }
+
+  .btn-whatsapp {
+    background-color: #1faa53;
+    color: #fff;
+    border-color: #1faa53;
+  }
+  .btn-whatsapp:hover {
+    background-color: #179044;
+    border-color: #179044;
+  }
+
+  .btn-sm { padding: 0.625rem 1.125rem; font-size: 0.75rem; }
+  .btn-block { width: 100%; }
+
+  /* --- Cards ------------------------------------------------------------ */
+  .card {
+    background-color: #fff;
+    border: 1px solid var(--color-steel-100);
+    transition: border-color 0.25s var(--ease-out-brand),
+                box-shadow 0.25s var(--ease-out-brand),
+                transform 0.25s var(--ease-out-brand);
+  }
+  .card-hover:hover {
+    border-color: var(--color-brand-200);
+    box-shadow: 0 18px 40px -24px rgb(13 27 42 / 0.35);
+    transform: translateY(-3px);
+  }
+
+  /* --- Rich text (CMS output) ------------------------------------------- */
+  .prose-rac { font-size: 1rem; line-height: 1.75; color: var(--color-steel-500); }
+  .prose-rac > * + * { margin-top: 1.1em; }
+  .prose-rac h2 {
+    font-size: 1.5rem;
+    color: var(--color-navy-800);
+    margin-top: 2.25em;
+    margin-bottom: 0.6em;
+  }
+  .prose-rac h3 {
+    font-size: 1.175rem;
+    color: var(--color-navy-800);
+    margin-top: 1.9em;
+    margin-bottom: 0.5em;
+  }
+  .prose-rac a {
+    color: var(--color-brand-700);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .prose-rac a:hover { color: var(--color-brand-600); }
+  .prose-rac strong { color: var(--color-navy-800); font-weight: 600; }
+  .prose-rac ul, .prose-rac ol { padding-left: 1.4em; }
+  .prose-rac ul { list-style: disc; }
+  .prose-rac ol { list-style: decimal; }
+  .prose-rac li + li { margin-top: 0.45em; }
+  .prose-rac li::marker { color: var(--color-brand-600); }
+  .prose-rac blockquote {
+    border-left: 4px solid var(--color-brand-600);
+    padding-left: 1.25rem;
+    font-style: italic;
+    color: var(--color-navy-700);
+  }
+  .prose-rac img { margin-block: 1.75em; width: 100%; }
+  .prose-rac table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+  .prose-rac th, .prose-rac td {
+    border: 1px solid var(--color-steel-200);
+    padding: 0.625rem 0.875rem;
+    text-align: left;
+  }
+  .prose-rac th { background-color: var(--color-steel-50); color: var(--color-navy-800); }
+
+  /* --- Utility ---------------------------------------------------------- */
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -100%;
+    z-index: 100;
+    background: var(--color-brand-600);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    font-weight: 600;
+    transition: top 0.2s;
+  }
+  .skip-link:focus { top: 1rem; }
+}
+
+@layer utilities {
+  .text-shadow-hero { text-shadow: 0 2px 24px rgb(5 11 19 / 0.55); }
+
+  .grid-noise {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s var(--ease-out-brand), transform 0.7s var(--ease-out-brand);
+  }
+  .reveal.is-visible { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; }
+  }
+}

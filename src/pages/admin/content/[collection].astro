@@ -1,0 +1,115 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import Icon from '../../../components/Icon.astro';
+import { findCollection, listColumns } from '../../../lib/adminSchema';
+import { getContent, collectionItems } from '../../../lib/content';
+
+const lang = Astro.cookies.get('rac_admin_lang')?.value === 'en' ? 'en' : 'id';
+const T = (id: string, en: string) => (lang === 'en' ? en : id);
+
+const collectionName = Astro.params.collection ?? '';
+const collection = findCollection(collectionName);
+if (!collection) return Astro.rewrite('/404');
+
+// Settings is a single record, so skip the list entirely.
+if (collection.singleton) return Astro.redirect('/admin/content/settings/default', 302);
+
+const content = await getContent(Astro.locals);
+const items = collectionItems(content, collectionName);
+
+const columns = listColumns(collection);
+
+/** Render a cell value that may be a plain string, a number, or bilingual. */
+function cell(value: unknown): string {
+  if (value == null) return '—';
+  if (typeof value === 'boolean') return value ? '✓' : '—';
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') {
+    const record = value as Record<string, string>;
+    return record[lang] ?? record.id ?? record.en ?? '—';
+  }
+  return '—';
+}
+---
+
+<AdminLayout title={collection.label[lang]} section={collection.name} wide>
+  <header class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <nav aria-label="Breadcrumb" class="text-[0.75rem] text-steel-300">
+        <a href="/admin" class="hover:text-navy-800">{T('Ringkasan', 'Overview')}</a>
+        <span class="mx-1.5" aria-hidden="true">/</span>
+        <span class="text-steel-400">{collection.label[lang]}</span>
+      </nav>
+      <h1 class="mt-2 text-2xl text-navy-800">{collection.label[lang]}</h1>
+      <p class="mt-1.5 text-sm text-steel-400">
+        {items.length} {T('item', 'items')}
+      </p>
+    </div>
+
+    <a href={`/admin/content/${collection.name}/new`} class="btn btn-primary btn-sm">
+      <Icon name="plus" size={15} />
+      {T('Tambah Baru', 'Add New')}
+    </a>
+  </header>
+
+  <div class="card mt-6 overflow-x-auto">
+    {items.length === 0 ? (
+      <p class="p-8 text-center text-sm text-steel-300">
+        {T('Belum ada item pada koleksi ini.', 'This collection has no items yet.')}
+      </p>
+    ) : (
+      <table class="w-full min-w-[42rem] border-collapse text-left text-sm">
+        <thead>
+          <tr class="border-b border-steel-100 bg-steel-50">
+            {columns.map((column) => (
+              <th scope="col" class="whitespace-nowrap p-3.5 font-display text-[0.6875rem] uppercase tracking-[0.12em] text-steel-400">
+                {column.label[lang]}
+              </th>
+            ))}
+            <th scope="col" class="p-3.5 text-right font-display text-[0.6875rem] uppercase tracking-[0.12em] text-steel-400">
+              {T('Aksi', 'Actions')}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item) => {
+            const key = String(item[collection.keyField] ?? '');
+            const editHref = `/admin/content/${collection.name}/${encodeURIComponent(key)}`;
+            return (
+              <tr class="border-b border-steel-100 last:border-0 hover:bg-steel-50">
+                {columns.map((column, index) => (
+                  <td class="max-w-xs p-3.5 align-top">
+                    {index === 0 ? (
+                      <a href={editHref} class="font-medium text-navy-800 underline-offset-2 hover:underline">
+                        <span class="line-clamp-2">{cell(item[column.name])}</span>
+                      </a>
+                    ) : (
+                      <span class="line-clamp-2 text-steel-500">{cell(item[column.name])}</span>
+                    )}
+                  </td>
+                ))}
+                <td class="whitespace-nowrap p-3.5 text-right align-top">
+                  <a href={editHref} class="inline-flex items-center gap-1.5 text-[0.8125rem] text-brand-600 hover:text-brand-700">
+                    <Icon name="edit" size={14} />
+                    {T('Ubah', 'Edit')}
+                  </a>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    )}
+  </div>
+
+  <p class="mt-4 flex items-start gap-2 text-[0.75rem] leading-relaxed text-steel-400">
+    <Icon name="info" size={14} class="mt-0.5 flex-none text-steel-300" />
+    <span>
+      {T(
+        'Item bawaan berasal dari repositori. Perubahan Anda disimpan sebagai penimpa di database, sehingga selalu dapat dikembalikan ke versi asli melalui tombol “Kembalikan ke Bawaan”.',
+        'Default items ship with the repository. Your edits are stored as overrides in the database, so any item can always be returned to its original with “Reset to default”.',
+      )}
+    </span>
+  </p>
+</AdminLayout>

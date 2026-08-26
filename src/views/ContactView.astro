@@ -1,0 +1,193 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { getPage } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, organizationSchema, localBusinessSchema } from '../lib/seo';
+import { whatsappUrl, telUrl, mailtoUrl } from '../lib/whatsapp';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ContactForm from '../components/ContactForm.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'contact');
+const site = getSiteUrl(Astro.locals);
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.contact'), path: localizedPath('contact', locale) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  localBusinessSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+]);
+
+const channels = [
+  {
+    icon: 'whatsapp' as const,
+    filled: true,
+    title: { id: 'WhatsApp — tercepat', en: 'WhatsApp — fastest' },
+    value: s.phoneDisplay,
+    href: whatsappUrl(s, locale, { sourceUrl: Astro.url.href }),
+    note: {
+      id: 'Dipantau di luar jam kerja untuk kebutuhan mendesak.',
+      en: 'Monitored outside office hours for urgent needs.',
+    },
+    external: true,
+  },
+  {
+    icon: 'phone' as const,
+    filled: false,
+    title: { id: 'Telepon', en: 'Telephone' },
+    value: s.phoneDisplay,
+    href: telUrl(s),
+    note: { id: 'Senin – Jumat, 08.00 – 17.00 WIB.', en: 'Monday – Friday, 08:00 – 17:00 WIB.' },
+    external: false,
+  },
+  {
+    icon: 'mail' as const,
+    filled: false,
+    title: { id: 'E-mail', en: 'E-mail' },
+    value: s.email,
+    href: mailtoUrl(s, locale === 'id' ? 'Permintaan penawaran' : 'Quotation request'),
+    note: { id: 'Untuk dokumen tender dan lampiran teknis.', en: 'For tender documents and technical attachments.' },
+    external: false,
+  },
+];
+
+const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(s.mapEmbedQuery)}&hl=${locale}&z=15&output=embed`;
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="contact"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={pick(page.heroTitle, locale)}
+    subtitle={pick(page.heroSubtitle, locale)}
+    trail={trail}
+  />
+
+  <!-- Contact channels -->
+  <section class="py-14 lg:py-16">
+    <div class="container-rac">
+      <ul class="grid gap-5 md:grid-cols-3">
+        {channels.map((channel) => (
+          <li class="card card-hover reveal relative p-6">
+            <span class="inline-flex h-11 w-11 items-center justify-center bg-steel-50 text-brand-600">
+              <Icon name={channel.icon} size={21} filled={channel.filled} />
+            </span>
+            <h2 class="mt-4 font-display text-[0.8125rem] uppercase tracking-[0.12em] text-steel-300">
+              {pick(channel.title, locale)}
+            </h2>
+            <a
+              href={channel.href}
+              target={channel.external ? '_blank' : undefined}
+              rel={channel.external ? 'noopener' : undefined}
+              class="mt-1.5 block break-all text-base font-semibold text-navy-800 after:absolute after:inset-0 hover:text-brand-600"
+              data-wa-cta={channel.icon === 'whatsapp' ? 'contact-channel' : undefined}
+            >{channel.value}</a>
+            <p class="mt-2 text-[0.8125rem] leading-relaxed text-steel-400">
+              {pick(channel.note, locale)}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Form + details -->
+  <section class="pb-16 lg:pb-24">
+    <div class="container-rac">
+      <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <div class="lg:col-span-7">
+          <SectionHeading
+            eyebrow={locale === 'id' ? 'Formulir' : 'Enquiry Form'}
+            title={t('section.contactTitle')}
+            intro={locale === 'id'
+              ? 'Semakin lengkap detail yang Anda kirim, semakin akurat penawaran yang kami balas.'
+              : 'The more detail you send, the more accurate the quotation we can return.'}
+          />
+          <div class="mt-8">
+            <ContactForm locale={locale} />
+          </div>
+        </div>
+
+        <aside class="lg:col-span-5">
+          <div class="card p-7">
+            <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+              {locale === 'id' ? 'Kantor & Fasilitas Latih' : 'Office & Training Facility'}
+            </h2>
+
+            <ul class="mt-5 space-y-4 text-sm">
+              <li class="flex gap-3">
+                <Icon name="map-pin" size={18} class="mt-0.5 flex-none text-brand-600" />
+                <address class="not-italic leading-relaxed text-steel-500">
+                  {pick(s.addressLine, locale)}<br />
+                  {s.city} {s.postalCode}<br />
+                  {s.region}, Indonesia
+                </address>
+              </li>
+              <li class="flex gap-3">
+                <Icon name="clock" size={18} class="mt-0.5 flex-none text-brand-600" />
+                <span class="leading-relaxed text-steel-500">{pick(s.openingHours, locale)}</span>
+              </li>
+              <li class="flex gap-3">
+                <Icon name="globe" size={18} class="mt-0.5 flex-none text-brand-600" />
+                <span class="leading-relaxed text-steel-500">
+                  {locale === 'id'
+                    ? 'Melayani seluruh Indonesia, termasuk lokasi lepas pantai dan terpencil.'
+                    : 'Serving all of Indonesia, including offshore and remote locations.'}
+                </span>
+              </li>
+            </ul>
+
+            <div class="mt-6 overflow-hidden border border-steel-100">
+              <iframe
+                src={mapSrc}
+                title={locale === 'id' ? `Peta lokasi ${s.brandName}` : `Map showing ${s.brandName}`}
+                width="100%"
+                height="260"
+                style="border:0"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              ></iframe>
+            </div>
+
+            <a
+              href={whatsappUrl(s, locale, { sourceUrl: Astro.url.href })}
+              class="btn btn-whatsapp btn-block mt-6"
+              target="_blank"
+              rel="noopener"
+              data-wa-cta="contact-sidebar"
+            >
+              <Icon name="whatsapp" size={17} filled />
+              {t('cta.whatsapp')}
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</SiteLayout>

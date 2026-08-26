@@ -1,0 +1,175 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { findService, publishedServices } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, serviceSchema, organizationSchema } from '../lib/seo';
+import { sanitizeHtml } from '../lib/security';
+import { whatsappUrl } from '../lib/whatsapp';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+  slug: string;
+}
+
+const { locale, content, slug } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const site = getSiteUrl(Astro.locals);
+
+const service = findService(content, slug)!;
+const related = publishedServices(content).filter((x) => x.slug !== slug).slice(0, 3);
+
+const title = pick(service.title, locale);
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.services'), path: localizedPath('services', locale) },
+  { name: title, path: localizedPath('services', locale, slug) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+  serviceSchema(site, service, locale),
+]);
+
+const wa = whatsappUrl(s, locale, { subject: title, sourceUrl: Astro.url.href });
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="services"
+  slug={slug}
+  content={content}
+  title={pick(service.metaTitle, locale) || `${title} · ${s.brandName}`}
+  description={pick(service.metaDescription, locale) || pick(service.summary, locale)}
+  jsonLd={jsonLd}
+  image={service.ogImage}
+  whatsappSubject={title}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={t('nav.services')}
+    title={title}
+    subtitle={pick(service.summary, locale)}
+    trail={trail}
+  >
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href={wa} class="btn btn-whatsapp" target="_blank" rel="noopener" data-wa-cta="service-hero">
+        <Icon name="whatsapp" size={17} filled />
+        {t('cta.quote')}
+      </a>
+      <a href={localizedPath('contact', locale)} class="btn btn-ghost-light">
+        {t('cta.consult')}
+        <Icon name="arrow-right" size={16} />
+      </a>
+    </div>
+  </PageHero>
+
+  <section class="py-14 lg:py-20">
+    <div class="container-rac">
+      <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <div class="lg:col-span-8">
+          <h2 class="text-xl text-navy-800 lg:text-2xl">{t('label.scope')}</h2>
+          <div class="rule-accent mt-4"></div>
+          <ul class="mt-6 space-y-3">
+            {service.scope[locale].map((item) => (
+              <li class="flex gap-3 text-[0.9375rem] leading-relaxed text-steel-500">
+                <Icon name="check" size={18} class="mt-0.5 flex-none text-brand-600" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          <h2 class="mt-14 text-xl text-navy-800 lg:text-2xl">
+            {locale === 'id' ? 'Yang Anda Terima' : 'What You Receive'}
+          </h2>
+          <div class="rule-accent mt-4"></div>
+          <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+            {service.deliverables[locale].map((item) => (
+              <li class="card flex gap-3 p-5 text-[0.875rem] leading-relaxed text-steel-500">
+                <Icon name="clipboard" size={18} class="mt-0.5 flex-none text-brand-600" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          {pick(service.body, locale) && (
+            <div class="prose-rac mt-14" set:html={sanitizeHtml(pick(service.body, locale))} />
+          )}
+        </div>
+
+        <aside class="lg:col-span-4">
+          <div class="sticky top-[calc(var(--header-h)+1.5rem)] space-y-5">
+            <div class="card p-6">
+              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+                {t('label.industries')}
+              </h2>
+              <ul class="mt-4 flex flex-wrap gap-2">
+                {service.industries[locale].map((industry) => (
+                  <li class="border border-steel-100 bg-steel-50 px-2.5 py-1 text-[0.75rem] text-steel-500">
+                    {industry}
+                  </li>
+                ))}
+              </ul>
+
+              <a href={wa} class="btn btn-whatsapp btn-block mt-6" target="_blank" rel="noopener" data-wa-cta="service-sidebar">
+                <Icon name="whatsapp" size={17} filled />
+                {t('cta.quote')}
+              </a>
+              <a href={localizedPath('contact', locale)} class="btn btn-ghost-dark btn-block mt-3">
+                {t('cta.consult')}
+              </a>
+            </div>
+
+            <div class="bg-navy-800 p-6 text-white">
+              <Icon name="shield-check" size={26} class="text-brand-500" />
+              <h2 class="mt-4 text-base">
+                {locale === 'id' ? 'Setiap Pekerjaan, Terdokumentasi' : 'Every Job, Documented'}
+              </h2>
+              <p class="mt-2.5 text-[0.8125rem] leading-relaxed text-white/65">
+                {locale === 'id'
+                  ? 'Penilaian risiko, rencana penyelamatan, sertifikat kompetensi personel, dan bukti asuransi diserahkan sebelum mobilisasi.'
+                  : 'Risk assessment, rescue plan, personnel competency certificates, and proof of insurance are handed over before mobilisation.'}
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  {related.length > 0 && (
+    <section class="bg-steel-50 py-16 lg:py-20">
+      <div class="container-rac">
+        <SectionHeading
+          eyebrow={locale === 'id' ? 'Layanan Lain' : 'Other Services'}
+          title={t('section.related')}
+        />
+        <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {related.map((item) => <ServiceCard locale={locale} service={item} compact />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Mulai dari percakapan singkat' : 'It starts with a short conversation'}
+    title={locale === 'id'
+      ? 'Ceritakan Lokasi\ndan Lingkup Pekerjaan Anda.'
+      : 'Tell Us the Site\nand the Scope of Work.'}
+    subject={title}
+  />
+</SiteLayout>

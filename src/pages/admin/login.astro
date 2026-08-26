@@ -1,0 +1,161 @@
+---
+import '../../styles/global.css';
+import Icon from '../../components/Icon.astro';
+import { ensureCsrfToken, isSecureRequest, isAuthConfigured } from '../../lib/auth';
+import { getEnv } from '../../lib/env';
+
+const nonce = Astro.locals.cspNonce;
+const configured = isAuthConfigured(getEnv(Astro.locals));
+ensureCsrfToken(Astro.cookies, isSecureRequest(Astro.request));
+
+const next = Astro.url.searchParams.get('next') ?? '';
+const safeNext = next.startsWith('/admin') && !next.startsWith('//') ? next : '';
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Masuk · RAC Dashboard</title>
+    <link rel="icon" href="/brand/icon-192.png" type="image/png" />
+    <meta name="theme-color" content="#0d1b2a" />
+  </head>
+
+  <body class="bg-navy-800">
+    <div class="relative flex min-h-dvh items-center justify-center overflow-hidden px-4 py-10">
+      <div class="absolute inset-0 grid-noise opacity-60" aria-hidden="true"></div>
+      <img
+        src="/brand/climber-240.webp"
+        width="240"
+        height="504"
+        alt=""
+        aria-hidden="true"
+        class="pointer-events-none absolute -right-10 bottom-0 hidden h-[80%] w-auto opacity-[0.06] md:block"
+      />
+
+      <div class="relative w-full max-w-sm">
+        <img
+          src="/brand/logo-onDark-240.webp"
+          width="200"
+          height="104"
+          alt="Rope Access Center"
+          class="mx-auto h-14 w-auto"
+        />
+
+        <div class="mt-8 bg-white p-7 shadow-2xl">
+          <h1 class="text-xl text-navy-800">Masuk Dashboard</h1>
+          <p class="mt-1.5 text-[0.8125rem] text-steel-400">
+            Kelola konten, media, dan pesan masuk situs RAC.
+          </p>
+
+          {!configured && (
+            <div class="mt-5 border-l-4 border-amber-500 bg-amber-50 p-4 text-[0.8125rem] leading-relaxed text-amber-900">
+              <p class="font-semibold">Dashboard belum dikonfigurasi.</p>
+              <p class="mt-1.5">
+                Setel <code class="bg-amber-100 px-1">ADMIN_EMAIL</code>,
+                <code class="bg-amber-100 px-1">ADMIN_PASSWORD_HASH</code>, dan
+                <code class="bg-amber-100 px-1">SESSION_SECRET</code> terlebih dahulu.
+                Panduannya ada di <code class="bg-amber-100 px-1">SETUP.md</code>.
+              </p>
+            </div>
+          )}
+
+          <form id="login-form" method="post" action="/api/admin/login" class="mt-6 space-y-4">
+            <input type="hidden" name="csrf" value="" />
+            <input type="hidden" name="next" value={safeNext} />
+
+            <div>
+              <label class="mb-2 block text-[0.8125rem] font-semibold text-navy-800" for="email">
+                Alamat E-mail
+              </label>
+              <input
+                class="w-full border border-steel-200 px-4 py-3 text-sm transition-colors focus:border-navy-800 focus:outline-none"
+                type="email"
+                id="email"
+                name="email"
+                required
+                autocomplete="username"
+                autofocus
+              />
+            </div>
+
+            <div>
+              <label class="mb-2 block text-[0.8125rem] font-semibold text-navy-800" for="password">
+                Kata Sandi
+              </label>
+              <input
+                class="w-full border border-steel-200 px-4 py-3 text-sm transition-colors focus:border-navy-800 focus:outline-none"
+                type="password"
+                id="password"
+                name="password"
+                required
+                autocomplete="current-password"
+              />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" data-submit>
+              <span data-submit-label>Masuk</span>
+              <Icon name="arrow-right" size={16} />
+            </button>
+
+            <p id="login-error" class="hidden text-[0.8125rem] text-brand-700" role="alert"></p>
+          </form>
+        </div>
+
+        <p class="mt-6 text-center text-[0.75rem] text-white/40">
+          Halaman ini tidak diindeks mesin pencari.
+        </p>
+      </div>
+    </div>
+
+    <script nonce={nonce} is:inline>
+      (function () {
+        var form = document.getElementById('login-form');
+        var error = document.getElementById('login-error');
+        var button = form.querySelector('[data-submit]');
+        var buttonLabel = form.querySelector('[data-submit-label]');
+
+        var match = document.cookie.match(/(?:^|;\s*)rac_csrf=([^;]+)/);
+        if (match) form.elements.csrf.value = decodeURIComponent(match[1]);
+
+        form.addEventListener('submit', function (event) {
+          event.preventDefault();
+          error.classList.add('hidden');
+
+          button.disabled = true;
+          button.style.opacity = '0.65';
+          buttonLabel.textContent = 'Memeriksa…';
+
+          fetch('/api/admin/login', {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { Accept: 'application/json' },
+          })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; })
+                .then(function (json) { return { ok: response.ok, data: json }; });
+            })
+            .then(function (result) {
+              if (result.ok && result.data.ok) {
+                window.location.href = result.data.redirect || '/admin';
+                return;
+              }
+              error.textContent = result.data.message || 'Gagal masuk. Periksa kembali kredensial Anda.';
+              error.classList.remove('hidden');
+            })
+            .catch(function () {
+              error.textContent = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
+              error.classList.remove('hidden');
+            })
+            .finally(function () {
+              button.disabled = false;
+              button.style.opacity = '';
+              buttonLabel.textContent = 'Masuk';
+            });
+        });
+      })();
+    </script>
+  </body>
+</html>

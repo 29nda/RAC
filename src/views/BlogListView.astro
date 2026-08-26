@@ -1,0 +1,127 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick, formatDateShort } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { getPage, publishedPosts } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, itemListSchema, organizationSchema } from '../lib/seo';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import PostCard from '../components/PostCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'blog');
+const site = getSiteUrl(Astro.locals);
+
+const posts = publishedPosts(content);
+const [lead, ...rest] = posts;
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.blog'), path: localizedPath('blog', locale) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+  itemListSchema(site, locale === 'id' ? 'Artikel RAC' : 'RAC Insights',
+    posts.map((post) => ({
+      name: pick(post.title, locale),
+      description: pick(post.excerpt, locale),
+      path: localizedPath('blog', locale, post.slug),
+    }))),
+]);
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="blog"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={pick(page.heroTitle, locale)}
+    subtitle={pick(page.heroSubtitle, locale)}
+    trail={trail}
+  />
+
+  <section class="py-14 lg:py-20">
+    <div class="container-rac">
+      {lead && (
+        <article class="card card-hover reveal relative mb-10 grid gap-0 lg:grid-cols-12">
+          <div class="relative flex items-center justify-center overflow-hidden bg-navy-800 p-10 lg:col-span-4">
+            <div class="absolute inset-0 grid-noise opacity-60" aria-hidden="true"></div>
+            <img
+              src="/brand/climber-240.webp"
+              width="240"
+              height="504"
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              class="relative h-44 w-auto opacity-80"
+            />
+          </div>
+
+          <div class="p-7 lg:col-span-8 lg:p-10">
+            <div class="flex flex-wrap items-center gap-3 text-[0.75rem] text-steel-300">
+              <span class="font-display font-bold uppercase tracking-[0.12em] text-brand-600">
+                {pick(lead.category, locale)}
+              </span>
+              <span aria-hidden="true">·</span>
+              <time datetime={lead.publishedAt}>{formatDateShort(lead.publishedAt, locale)}</time>
+              <span aria-hidden="true">·</span>
+              <span class="flex items-center gap-1.5">
+                <Icon name="clock" size={13} />{lead.readingMinutes} {t('label.readTime')}
+              </span>
+            </div>
+
+            <h2 class="mt-4 text-xl leading-snug text-navy-800 lg:text-2xl">
+              <a href={localizedPath('blog', locale, lead.slug)} class="after:absolute after:inset-0">
+                {pick(lead.title, locale)}
+              </a>
+            </h2>
+
+            <p class="mt-4 text-[0.9375rem] leading-relaxed text-steel-400">
+              {pick(lead.excerpt, locale)}
+            </p>
+
+            <p class="mt-6 flex items-center gap-2 font-display text-[0.75rem] font-bold uppercase tracking-[0.1em] text-brand-600">
+              {t('cta.learnMore')}
+              <Icon name="arrow-right" size={15} />
+            </p>
+          </div>
+        </article>
+      )}
+
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {rest.map((post) => <PostCard locale={locale} post={post} />)}
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Ada topik yang ingin dibahas?' : 'A topic you want covered?'}
+    title={locale === 'id'
+      ? 'Kirimkan Pertanyaan Anda,\nKami Jawab di Artikel Berikutnya.'
+      : 'Send Us Your Question,\nWe Will Answer It in a Future Piece.'}
+    subject={locale === 'id' ? 'usulan topik artikel' : 'an article topic suggestion'}
+  />
+</SiteLayout>

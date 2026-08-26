@@ -1,0 +1,145 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { getPage, publishedTeam } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, organizationSchema, breadcrumbSchema } from '../lib/seo';
+import { sanitizeHtml } from '../lib/security';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import StatsBar from '../components/StatsBar.astro';
+import CtaBand from '../components/CtaBand.astro';
+import TrustStrip from '../components/TrustStrip.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'about');
+const site = getSiteUrl(Astro.locals);
+const team = publishedTeam(content);
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.about'), path: localizedPath('about', locale) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+]);
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="about"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={pick(page.heroTitle, locale)}
+    subtitle={pick(page.heroSubtitle, locale)}
+    trail={trail}
+  />
+
+  <section class="bg-navy-900 py-10">
+    <div class="container-rac">
+      <StatsBar locale={locale} stats={s.stats} />
+    </div>
+  </section>
+
+  <section class="py-16 lg:py-24">
+    <div class="container-rac">
+      <div class="prose-rac mx-auto max-w-3xl" set:html={sanitizeHtml(pick(page.body, locale))} />
+    </div>
+  </section>
+
+  {team.length > 0 && (
+    <section class="bg-steel-50 py-16 lg:py-24">
+      <div class="container-rac">
+        <SectionHeading
+          eyebrow={locale === 'id' ? 'Tim Kami' : 'Our Team'}
+          title={locale === 'id' ? 'Orang di Balik Standar Ini' : 'The People Behind the Standard'}
+          intro={locale === 'id'
+            ? 'Instruktur dan pengelola RAC — dipilih karena jam lapangan, bukan hanya gelar.'
+            : 'RAC’s instructors and management — chosen for field hours, not only credentials.'}
+          align="center"
+        />
+
+        <ul class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {team.map((member) => (
+            <li class="card reveal flex h-full flex-col p-6">
+              <span
+                class="flex h-14 w-14 items-center justify-center bg-navy-800 font-display text-lg font-bold text-white"
+                aria-hidden="true"
+              >{member.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>
+
+              <h3 class="mt-5 text-base text-navy-800">{member.name}</h3>
+              <p class="mt-1 text-[0.8125rem] font-semibold text-brand-600">
+                {pick(member.role, locale)}
+              </p>
+              <p class="mt-3 flex-1 text-[0.8125rem] leading-relaxed text-steel-400">
+                {pick(member.bio, locale)}
+              </p>
+
+              {member.credentials.length > 0 && (
+                <ul class="mt-4 flex flex-wrap gap-1.5 border-t border-steel-100 pt-4">
+                  {member.credentials.map((credential) => (
+                    <li class="bg-steel-50 px-2 py-0.5 text-[0.6875rem] text-steel-400">{credential}</li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <section class="py-16 lg:py-20">
+    <div class="container-rac">
+      <SectionHeading
+        eyebrow={locale === 'id' ? 'Standar & Afiliasi' : 'Standards & Affiliations'}
+        title={locale === 'id' ? 'Kerangka Kerja Kami' : 'The Frameworks We Work To'}
+        align="center"
+      />
+      <div class="mt-10">
+        <TrustStrip locale={locale} items={content.accreditations} />
+      </div>
+
+      <div class="mt-10 flex flex-wrap justify-center gap-3">
+        <a href={localizedPath('certification', locale)} class="btn btn-ghost-dark">
+          {t('nav.certification')}
+          <Icon name="arrow-right" size={16} />
+        </a>
+        <a href={localizedPath('training', locale)} class="btn btn-primary">
+          {t('cta.explore')}
+          <Icon name="arrow-right" size={16} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Mari berkenalan lebih jauh' : 'Let us get properly acquainted'}
+    title={locale === 'id'
+      ? 'Ceritakan Tantangan\nKeselamatan di Tempat Anda.'
+      : 'Tell Us About the Safety\nChallenge on Your Site.'}
+    subject={locale === 'id' ? 'profil dan kapabilitas RAC' : 'the RAC profile and capabilities'}
+  />
+</SiteLayout>

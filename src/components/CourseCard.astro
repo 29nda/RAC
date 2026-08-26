@@ -1,0 +1,64 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { Course } from '../lib/types';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  course: Course;
+}
+
+const { locale, course } = Astro.props;
+const t = useTranslations(locale);
+const href = localizedPath('training', locale, course.slug);
+
+const SCHEME_TONE: Record<string, string> = {
+  IRATA: 'bg-navy-800 text-white',
+  BNSP: 'bg-brand-600 text-white',
+  SPRAT: 'bg-charcoal text-white',
+  'IN-HOUSE': 'bg-steel-100 text-navy-800',
+};
+---
+
+<article class="card card-hover reveal flex h-full flex-col">
+  <div class="flex items-start justify-between gap-3 border-b border-steel-100 p-6 pb-5">
+    <div>
+      <span class:list={[
+        'inline-block px-2.5 py-1 font-display text-[0.625rem] font-bold uppercase tracking-[0.14em]',
+        SCHEME_TONE[course.scheme] ?? SCHEME_TONE['IN-HOUSE'],
+      ]}>{course.scheme}</span>
+      <h3 class="mt-3.5 text-lg leading-snug text-navy-800">
+        <a href={href} class="after:absolute after:inset-0 relative">
+          {pick(course.title, locale)}
+        </a>
+      </h3>
+    </div>
+    <Icon name="graduation-cap" size={30} class="mt-1 flex-none text-steel-200" />
+  </div>
+
+  <div class="flex flex-1 flex-col p-6 pt-5">
+    <p class="text-sm leading-relaxed text-steel-400">{pick(course.summary, locale)}</p>
+
+    <dl class="mt-5 space-y-2 text-[0.8125rem]">
+      <div class="flex gap-2">
+        <dt class="flex flex-none items-center gap-1.5 text-steel-300">
+          <Icon name="clock" size={14} />{t('label.duration')}
+        </dt>
+        <dd class="text-navy-800">{pick(course.duration, locale)}</dd>
+      </div>
+      <div class="flex gap-2">
+        <dt class="flex flex-none items-center gap-1.5 text-steel-300">
+          <Icon name="layers" size={14} />{t('label.level')}
+        </dt>
+        <dd class="text-navy-800">{course.level}</dd>
+      </div>
+    </dl>
+
+    <p class="mt-6 flex items-center gap-2 font-display text-[0.75rem] font-bold uppercase tracking-[0.1em] text-brand-600">
+      {t('cta.learnMore')}
+      <Icon name="arrow-right" size={15} />
+    </p>
+  </div>
+</article>

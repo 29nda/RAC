@@ -1,0 +1,239 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick, formatDate } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { getPage, publishedCourses, upcomingSchedule } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, organizationSchema, courseSchema } from '../lib/seo';
+import { whatsappUrl } from '../lib/whatsapp';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'schedule');
+const site = getSiteUrl(Astro.locals);
+
+const courses = publishedCourses(content);
+const courseBySlug = new Map(courses.map((course) => [course.slug, course]));
+const sessions = upcomingSchedule(content).filter((session) => courseBySlug.has(session.courseSlug));
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.training'), path: localizedPath('training', locale) },
+  { name: t('nav.schedule'), path: localizedPath('schedule', locale) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+  ...courses
+    .filter((course) => sessions.some((session) => session.courseSlug === course.slug))
+    .map((course) => courseSchema(site, course, locale, s, sessions)),
+]);
+
+const STATUS_TONE: Record<string, string> = {
+  open: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  limited: 'bg-amber-50 text-amber-700 border-amber-200',
+  full: 'bg-steel-100 text-steel-400 border-steel-200',
+  request: 'bg-navy-50 text-navy-700 border-navy-200',
+};
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="schedule"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+  whatsappSubject={locale === 'id' ? 'jadwal pelatihan' : 'training dates'}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={pick(page.heroTitle, locale)}
+    subtitle={pick(page.heroSubtitle, locale)}
+    trail={trail}
+  />
+
+  <section class="py-14 lg:py-20">
+    <div class="container-rac">
+      {sessions.length === 0 ? (
+        <div class="card p-10 text-center">
+          <Icon name="calendar" size={34} class="mx-auto text-steel-200" />
+          <p class="mt-4 text-steel-400">
+            {locale === 'id'
+              ? 'Jadwal angkatan berikutnya sedang disusun. Hubungi kami via WhatsApp untuk mendapatkan tanggal terbaru.'
+              : 'The next cohort dates are being finalised. Message us on WhatsApp for the latest schedule.'}
+          </p>
+          <a
+            href={whatsappUrl(s, locale, { sourceUrl: Astro.url.href })}
+            class="btn btn-whatsapp mt-6"
+            target="_blank"
+            rel="noopener"
+          >
+            <Icon name="whatsapp" size={17} filled />
+            {t('cta.askSchedule')}
+          </a>
+        </div>
+      ) : (
+        <>
+          <!-- Desktop table -->
+          <div class="hidden overflow-x-auto lg:block">
+            <table class="w-full border-collapse text-left text-sm">
+              <caption class="sr-only">
+                {locale === 'id' ? 'Jadwal kelas terbuka' : 'Open course schedule'}
+              </caption>
+              <thead>
+                <tr class="border-b-2 border-navy-800 text-navy-800">
+                  {[t('label.date'), t('nav.training'), t('label.location'), t('label.status'), ''].map((heading) => (
+                    <th scope="col" class="p-4 font-display text-[0.75rem] uppercase tracking-[0.12em]">
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sessions.map((session) => {
+                  const course = courseBySlug.get(session.courseSlug)!;
+                  const courseTitle = pick(course.title, locale);
+                  return (
+                    <tr class="border-b border-steel-100 transition-colors hover:bg-steel-50">
+                      <td class="p-4 align-top">
+                        <p class="font-semibold text-navy-800">{formatDate(session.startDate, locale)}</p>
+                        <p class="text-[0.75rem] text-steel-300">
+                          {locale === 'id' ? 'sampai' : 'until'} {formatDate(session.endDate, locale)}
+                        </p>
+                      </td>
+                      <td class="p-4 align-top">
+                        <a
+                          href={localizedPath('training', locale, course.slug)}
+                          class="font-medium text-navy-800 underline-offset-4 hover:underline"
+                        >{courseTitle}</a>
+                        <p class="text-[0.75rem] text-steel-300">{course.scheme} · {course.level}</p>
+                      </td>
+                      <td class="p-4 align-top text-steel-500">{pick(session.location, locale)}</td>
+                      <td class="p-4 align-top">
+                        <span class:list={[
+                          'inline-block border px-2.5 py-1 text-[0.6875rem] font-semibold uppercase tracking-wide',
+                          STATUS_TONE[session.status],
+                        ]}>{t(`status.${session.status}` as 'status.open')}</span>
+                        {session.status !== 'request' && session.seatsLeft > 0 && (
+                          <p class="mt-1 text-[0.75rem] text-steel-300">
+                            {session.seatsLeft} {t('label.seats')}
+                          </p>
+                        )}
+                      </td>
+                      <td class="p-4 align-top text-right">
+                        <a
+                          href={whatsappUrl(s, locale, {
+                            subject: `${courseTitle} (${session.startDate})`,
+                            sourceUrl: Astro.url.href,
+                          })}
+                          class="btn btn-whatsapp btn-sm"
+                          target="_blank"
+                          rel="noopener"
+                          data-wa-cta="schedule-row"
+                        >
+                          <Icon name="whatsapp" size={15} filled />
+                          {session.status === 'full' ? t('cta.askSchedule') : t('cta.enroll')}
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile cards -->
+          <ul class="grid gap-4 lg:hidden">
+            {sessions.map((session) => {
+              const course = courseBySlug.get(session.courseSlug)!;
+              const courseTitle = pick(course.title, locale);
+              return (
+                <li class="card reveal p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <p class="font-display text-[0.6875rem] uppercase tracking-[0.12em] text-brand-600">
+                        {course.scheme} · {course.level}
+                      </p>
+                      <h2 class="mt-1.5 text-base leading-snug text-navy-800">
+                        <a href={localizedPath('training', locale, course.slug)}>{courseTitle}</a>
+                      </h2>
+                    </div>
+                    <span class:list={[
+                      'flex-none border px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-wide',
+                      STATUS_TONE[session.status],
+                    ]}>{t(`status.${session.status}` as 'status.open')}</span>
+                  </div>
+
+                  <dl class="mt-4 space-y-2 text-[0.8125rem]">
+                    <div class="flex gap-2">
+                      <dt class="flex flex-none items-center gap-1.5 text-steel-300">
+                        <Icon name="calendar" size={14} />{t('label.date')}
+                      </dt>
+                      <dd class="text-navy-800">
+                        {formatDate(session.startDate, locale)} – {formatDate(session.endDate, locale)}
+                      </dd>
+                    </div>
+                    <div class="flex gap-2">
+                      <dt class="flex flex-none items-center gap-1.5 text-steel-300">
+                        <Icon name="map-pin" size={14} />{t('label.location')}
+                      </dt>
+                      <dd class="text-navy-800">{pick(session.location, locale)}</dd>
+                    </div>
+                  </dl>
+
+                  <a
+                    href={whatsappUrl(s, locale, {
+                      subject: `${courseTitle} (${session.startDate})`,
+                      sourceUrl: Astro.url.href,
+                    })}
+                    class="btn btn-whatsapp btn-block mt-5"
+                    target="_blank"
+                    rel="noopener"
+                    data-wa-cta="schedule-card"
+                  >
+                    <Icon name="whatsapp" size={16} filled />
+                    {session.status === 'full' ? t('cta.askSchedule') : t('cta.enroll')}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+
+      <p class="mt-8 flex items-start gap-2.5 text-[0.8125rem] leading-relaxed text-steel-400">
+        <Icon name="info" size={16} class="mt-0.5 flex-none text-steel-300" />
+        <span>
+          {locale === 'id'
+            ? 'Jadwal dapat berubah apabila kuota minimum tidak tercapai. Untuk enam peserta atau lebih, kami dapat membuka angkatan khusus pada tanggal yang Anda tentukan.'
+            : 'Dates may change if the minimum cohort size is not met. For six participants or more, we can open a dedicated cohort on dates you choose.'}
+        </span>
+      </p>
+    </div>
+  </section>
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Tanggalnya tidak cocok?' : 'Dates do not fit?'}
+    title={locale === 'id'
+      ? 'Kami Buka Angkatan Khusus\nuntuk Tim Anda.'
+      : 'We Will Open a Dedicated\nCohort for Your Team.'}
+    subject={locale === 'id' ? 'angkatan khusus perusahaan' : 'a dedicated company cohort'}
+  />
+</SiteLayout>

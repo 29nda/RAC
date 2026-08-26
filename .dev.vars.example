@@ -1,0 +1,17 @@
+# Copy to `.dev.vars` for local development (`npm run dev`).
+# NEVER commit `.dev.vars` — it is git-ignored.
+
+# Login e-mail for the /admin dashboard
+ADMIN_EMAIL="admin@ropeaccesscenter.com"
+
+# PBKDF2 hash of the admin password.
+# Generate with:  npm run admin:hash -- "your-strong-password"
+ADMIN_PASSWORD_HASH="pbkdf2$210000$REPLACE$REPLACE"
+
+# 32-byte hex secret used to sign session cookies.
+# Generate with:  openssl rand -hex 32
+SESSION_SECRET="0000000000000000000000000000000000000000000000000000000000000000"
+
+# Optional — Cloudflare Turnstile (anti-spam on the contact form)
+TURNSTILE_SECRET_KEY=""
+PUBLIC_TURNSTILE_SITE_KEY=""

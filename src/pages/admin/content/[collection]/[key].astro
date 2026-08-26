@@ -1,0 +1,211 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import FieldEditor from '../../../../components/admin/FieldEditor.astro';
+import Icon from '../../../../components/Icon.astro';
+import { findCollection } from '../../../../lib/adminSchema';
+import { getContent, collectionItems } from '../../../../lib/content';
+import { localizedPath, type RouteKey } from '../../../../i18n/config';
+
+const lang = Astro.cookies.get('rac_admin_lang')?.value === 'en' ? 'en' : 'id';
+const T = (id: string, en: string) => (lang === 'en' ? en : id);
+
+const collectionName = Astro.params.collection ?? '';
+const rawKey = Astro.params.key ?? '';
+const collection = findCollection(collectionName);
+if (!collection) return Astro.rewrite('/404');
+
+const isNew = rawKey === 'new';
+const content = await getContent(Astro.locals);
+
+let item: Record<string, unknown> = {};
+
+if (collection.singleton) {
+  item = content.settings as unknown as Record<string, unknown>;
+} else if (!isNew) {
+  const found = collectionItems(content, collectionName)
+    .find((entry) => String(entry[collection.keyField]) === rawKey);
+  if (!found) return Astro.rewrite('/404');
+  item = found;
+} else {
+  // Sensible starting values so a new item is publishable straight away.
+  item = { published: true, featured: false, order: 99 };
+}
+
+const originalKey = collection.singleton ? 'default' : (isNew ? '' : rawKey);
+const listHref = `/admin/content/${collection.name}`;
+
+/** Where this item appears on the public site, when it has a page of its own. */
+const PREVIEW_ROUTE: Record<string, RouteKey> = {
+  courses: 'training',
+  services: 'services',
+  posts: 'blog',
+};
+const previewRoute = PREVIEW_ROUTE[collection.name];
+const previewHref = previewRoute && !isNew
+  ? localizedPath(previewRoute, 'id', String(item[collection.keyField] ?? ''))
+  : collection.name === 'pages' && !isNew && (rawKey in content.pages)
+    ? null
+    : null;
+
+const title = collection.singleton
+  ? collection.label[lang]
+  : isNew
+    ? `${T('Tambah', 'New')} — ${collection.label[lang]}`
+    : String(
+        (item.title as Record<string, string> | undefined)?.[lang]
+        ?? item.name
+        ?? item[collection.keyField]
+        ?? '',
+      );
+---
+
+<AdminLayout title={title} section={collection.name}>
+  <header class="flex flex-wrap items-start justify-between gap-4">
+    <div class="min-w-0">
+      <nav aria-label="Breadcrumb" class="text-[0.75rem] text-steel-300">
+        <a href="/admin" class="hover:text-navy-800">{T('Ringkasan', 'Overview')}</a>
+        <span class="mx-1.5" aria-hidden="true">/</span>
+        {collection.singleton ? (
+          <span class="text-steel-400">{collection.label[lang]}</span>
+        ) : (
+          <>
+            <a href={listHref} class="hover:text-navy-800">{collection.label[lang]}</a>
+            <span class="mx-1.5" aria-hidden="true">/</span>
+            <span class="text-steel-400">{isNew ? T('Baru', 'New') : rawKey}</span>
+          </>
+        )}
+      </nav>
+      <h1 class="mt-2 truncate text-2xl text-navy-800">{title}</h1>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      {previewHref && (
+        <a href={previewHref} target="_blank" rel="noopener" class="btn btn-ghost-dark btn-sm">
+          <Icon name="external-link" size={14} />
+          {T('Pratinjau', 'Preview')}
+        </a>
+      )}
+      {!collection.singleton && (
+        <a href={listHref} class="btn btn-ghost-dark btn-sm">
+          <Icon name="arrow-left" size={14} />
+          {T('Kembali', 'Back')}
+        </a>
+      )}
+    </div>
+  </header>
+
+  <form id="content-form" class="card mt-6 p-6 lg:p-8">
+    <input type="hidden" name="csrf" value="" />
+    <input type="hidden" name="collection" value={collection.name} />
+    <input type="hidden" name="originalKey" value={originalKey} />
+    <input type="hidden" name="action" value="save" />
+
+    {collection.fields.map((field) => (
+      <FieldEditor field={field} value={item[field.name]} lang={lang} />
+    ))}
+
+    <div class="mt-8 flex flex-wrap items-center gap-3 border-t border-steel-100 pt-6">
+      <button type="submit" class="btn btn-primary" data-submit>
+        <Icon name="save" size={16} />
+        <span data-submit-label>{T('Simpan Perubahan', 'Save Changes')}</span>
+      </button>
+
+      {!isNew && !collection.singleton && (
+        <>
+          <button type="button" class="btn btn-ghost-dark btn-sm" data-action="reset">
+            {T('Kembalikan ke Bawaan', 'Reset to Default')}
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm ml-auto border-brand-200 text-brand-700 hover:bg-brand-600 hover:text-white"
+            data-action="delete"
+          >
+            <Icon name="trash" size={14} />
+            {T('Hapus', 'Delete')}
+          </button>
+        </>
+      )}
+    </div>
+
+    <p id="form-message" class="mt-4 hidden text-sm" role="status" aria-live="polite"></p>
+  </form>
+</AdminLayout>
+
+<script
+  nonce={Astro.locals.cspNonce}
+  is:inline
+  define:vars={{
+    listHref,
+    savingText: T('Menyimpan…', 'Saving…'),
+    saveText: T('Simpan Perubahan', 'Save Changes'),
+    savedText: T('Tersimpan.', 'Saved.'),
+    failText: T('Gagal menyimpan.', 'Could not save.'),
+    confirmDelete: T('Hapus item ini dari situs?', 'Remove this item from the site?'),
+    confirmReset: T('Kembalikan item ini ke versi bawaan repositori?', 'Restore this item to the repository default?'),
+    isNew,
+  }}
+>
+  (function () {
+    var form = document.getElementById('content-form');
+    var message = document.getElementById('form-message');
+    var button = form.querySelector('[data-submit]');
+    var buttonLabel = form.querySelector('[data-submit-label]');
+
+    form.elements.csrf.value = window.RAC_ADMIN.csrf;
+
+    function show(text, ok) {
+      message.textContent = text;
+      message.style.color = ok ? '#15803d' : '#bf0510';
+      message.classList.remove('hidden');
+    }
+
+    function submit(action) {
+      var body = new FormData(form);
+      body.set('action', action);
+
+      button.disabled = true;
+      button.style.opacity = '0.65';
+      buttonLabel.textContent = savingText;
+
+      window.RAC_ADMIN.post('/api/admin/content', body)
+        .then(function (result) {
+          if (!result.ok || !result.data.ok) {
+            show(result.data.message || failText, false);
+            return;
+          }
+          if (action === 'delete' || action === 'reset') {
+            window.location.href = listHref;
+            return;
+          }
+          show(savedText, true);
+          window.RAC_ADMIN.toast(savedText, true);
+          // A newly created item lives at its own URL from now on.
+          if (isNew && result.data.key) {
+            window.location.href = listHref + '/' + encodeURIComponent(result.data.key);
+          } else {
+            form.elements.originalKey.value = result.data.key || form.elements.originalKey.value;
+          }
+        })
+        .catch(function () { show(failText, false); })
+        .finally(function () {
+          button.disabled = false;
+          button.style.opacity = '';
+          buttonLabel.textContent = saveText;
+        });
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      submit('save');
+    });
+
+    form.querySelectorAll('[data-action]').forEach(function (control) {
+      control.addEventListener('click', function () {
+        var action = control.getAttribute('data-action');
+        var prompt = action === 'delete' ? confirmDelete : confirmReset;
+        if (window.confirm(prompt)) submit(action);
+      });
+    });
+  })();
+</script>

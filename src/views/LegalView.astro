@@ -1,0 +1,59 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { getPage } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, organizationSchema } from '../lib/seo';
+import { sanitizeHtml } from '../lib/security';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+  pageKey: 'privacy' | 'terms';
+}
+
+const { locale, content, pageKey } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, pageKey);
+const site = getSiteUrl(Astro.locals);
+
+const title = pick(page.heroTitle, locale);
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: title, path: localizedPath(pageKey, locale) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+]);
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey={pageKey}
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={title}
+    trail={trail}
+    compact
+  />
+
+  <section class="py-14 lg:py-20">
+    <div class="container-rac">
+      <div class="prose-rac mx-auto max-w-3xl" set:html={sanitizeHtml(pick(page.body, locale))} />
+    </div>
+  </section>
+</SiteLayout>

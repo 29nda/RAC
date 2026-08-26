@@ -1,0 +1,33 @@
+---
+import type { Locale } from '../i18n/config';
+import { pick } from '../i18n/ui';
+import type { Accreditation } from '../lib/types';
+
+interface Props {
+  locale: Locale;
+  items: Accreditation[];
+}
+
+const { locale, items } = Astro.props;
+---
+
+<ul class="grid grid-cols-2 border-t border-l border-steel-100 sm:grid-cols-3 lg:grid-cols-5">
+  {items.map((item) => (
+    <li class="reveal border-b border-r border-steel-100 p-6 text-center">
+      {item.logo ? (
+        <img
+          src={item.logo}
+          alt={item.name}
+          width="140"
+          height="48"
+          loading="lazy"
+          decoding="async"
+          class="mx-auto h-10 w-auto object-contain opacity-70 grayscale transition hover:opacity-100 hover:grayscale-0"
+        />
+      ) : (
+        <p class="font-display text-lg font-bold tracking-[0.06em] text-navy-800">{item.name}</p>
+      )}
+      <p class="mt-2 text-[0.6875rem] leading-snug text-steel-300">{pick(item.note, locale)}</p>
+    </li>
+  ))}
+</ul>
