@@ -1,0 +1,63 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+import type { SiteSettings } from '../lib/types';
+import { whatsappUrl } from '../lib/whatsapp';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  settings: SiteSettings;
+  eyebrow?: string;
+  title: string;
+  subject?: string;
+}
+
+const { locale, settings, eyebrow, title, subject } = Astro.props;
+const t = useTranslations(locale);
+const lines = title.split('\n');
+const wa = whatsappUrl(settings, locale, { subject, sourceUrl: Astro.url.href });
+---
+
+<section class="relative overflow-hidden bg-navy-800 text-white">
+  <div class="absolute inset-0 grid-noise opacity-50" aria-hidden="true"></div>
+  <div
+    class="absolute -left-32 top-0 h-full w-[30rem] skew-x-[-16deg] bg-gradient-to-r from-brand-600/20 to-transparent"
+    aria-hidden="true"
+  ></div>
+  <img
+    src="/brand/climber-240.webp"
+    width="240"
+    height="504"
+    alt=""
+    aria-hidden="true"
+    loading="lazy"
+    decoding="async"
+    class="pointer-events-none absolute right-8 top-1/2 hidden h-[130%] w-auto -translate-y-1/2 opacity-[0.08] lg:block"
+  />
+
+  <div class="container-rac relative py-14 lg:py-16">
+    <div class="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
+      <div class="reveal max-w-2xl">
+        {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+        <h2 class="text-2xl sm:text-3xl lg:text-[2.125rem]">
+          {lines.map((line, index) => (
+            <>{index > 0 && <br />}{line}</>
+          ))}
+        </h2>
+      </div>
+
+      <div class="reveal flex flex-col gap-3 sm:flex-row lg:flex-none">
+        <a href={wa} class="btn btn-primary" target="_blank" rel="noopener" data-wa-cta="band">
+          <Icon name="whatsapp" size={17} filled />
+          {t('cta.whatsapp')}
+        </a>
+        <a href={localizedPath('contact', locale)} class="btn btn-ghost-light">
+          {t('cta.quote')}
+          <Icon name="arrow-right" size={16} />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

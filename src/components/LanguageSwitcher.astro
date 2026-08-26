@@ -1,0 +1,52 @@
+---
+import type { Locale, RouteKey } from '../i18n/config';
+import { LOCALES, LOCALE_META, alternatePath } from '../i18n/config';
+import { useTranslations } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+  routeKey: RouteKey;
+  slug?: string;
+  class?: string;
+  variant?: 'dark' | 'light';
+}
+
+const { locale, routeKey, slug, class: className = '', variant = 'dark' } = Astro.props;
+const t = useTranslations(locale);
+
+const base = variant === 'dark'
+  ? 'border-white/20 text-white/60 hover:text-white'
+  : 'border-navy-200 text-steel-400 hover:text-navy-800';
+const active = variant === 'dark'
+  ? 'bg-white text-navy-800'
+  : 'bg-navy-800 text-white';
+---
+
+<div
+  class:list={['inline-flex items-center border', base, className]}
+  role="group"
+  aria-label={t('meta.lang')}
+>
+  {LOCALES.map((code) => (
+    code === locale ? (
+      <span
+        class:list={['px-2.5 py-1 text-[0.6875rem] font-bold tracking-[0.12em]', active]}
+        aria-current="true"
+        lang={LOCALE_META[code].htmlLang}
+      >
+        {LOCALE_META[code].short}
+      </span>
+    ) : (
+      <a
+        href={alternatePath(routeKey, slug, code)}
+        class="px-2.5 py-1 text-[0.6875rem] font-bold tracking-[0.12em] transition-colors"
+        hreflang={LOCALE_META[code].htmlLang}
+        lang={LOCALE_META[code].htmlLang}
+        title={LOCALE_META[code].label}
+        rel="alternate"
+      >
+        {LOCALE_META[code].short}
+      </a>
+    )
+  ))}
+</div>

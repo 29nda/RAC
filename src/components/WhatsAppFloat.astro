@@ -1,0 +1,69 @@
+---
+import type { Locale } from '../i18n/config';
+import type { SiteSettings } from '../lib/types';
+import { useTranslations } from '../i18n/ui';
+import { whatsappUrl } from '../lib/whatsapp';
+import Icon from './Icon.astro';
+
+interface Props {
+  locale: Locale;
+  settings: SiteSettings;
+  /** What the visitor is currently reading, pre-filled into the message. */
+  subject?: string;
+}
+
+const { locale, settings, subject } = Astro.props;
+const t = useTranslations(locale);
+const nonce = Astro.locals.cspNonce;
+
+const href = whatsappUrl(settings, locale, {
+  subject,
+  sourceUrl: Astro.url.href,
+});
+
+const label = locale === 'id'
+  ? 'Ada pertanyaan? Chat kami'
+  : 'Questions? Chat with us';
+---
+
+<div class="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 print:hidden">
+  <button
+    type="button"
+    id="to-top"
+    class="hidden h-11 w-11 items-center justify-center border border-navy-200 bg-white text-navy-800 shadow-lg transition-colors hover:bg-navy-800 hover:text-white"
+    aria-label={t('meta.toTop')}
+  >
+    <Icon name="arrow-up" size={20} />
+  </button>
+
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener"
+    data-wa-cta="float"
+    class="flex items-center gap-2.5 rounded-full bg-[#1faa53] px-4 py-3.5 text-white shadow-[0_10px_30px_-8px_rgba(31,170,83,0.7)] transition-colors hover:bg-[#179044]"
+    aria-label={t('cta.whatsapp')}
+  >
+    <Icon name="whatsapp" size={26} filled />
+    <span class="hidden whitespace-nowrap pr-1 text-sm font-semibold lg:inline">{label}</span>
+  </a>
+</div>
+
+<script nonce={nonce} is:inline>
+  (function () {
+    var button = document.getElementById('to-top');
+    if (!button) return;
+
+    var onScroll = function () {
+      button.classList.toggle('hidden', window.scrollY < 600);
+      button.classList.toggle('flex', window.scrollY >= 600);
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    button.addEventListener('click', function () {
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    });
+  })();
+</script>

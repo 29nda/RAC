@@ -1,0 +1,192 @@
+---
+import type { FieldDef } from '../../lib/adminSchema';
+import Icon from '../Icon.astro';
+
+interface Props {
+  field: FieldDef;
+  value: unknown;
+  lang: 'id' | 'en';
+}
+
+const { field, value, lang } = Astro.props;
+
+const input = 'w-full border border-steel-200 bg-white px-3 py-2.5 text-sm text-navy-800 transition-colors placeholder:text-steel-300 focus:border-navy-800 focus:outline-none';
+const mono = 'font-mono text-[0.8125rem]';
+
+const asRecord = (raw: unknown): Record<string, string> =>
+  (raw && typeof raw === 'object' && !Array.isArray(raw)) ? (raw as Record<string, string>) : {};
+
+const asListRecord = (raw: unknown): Record<string, string[]> =>
+  (raw && typeof raw === 'object' && !Array.isArray(raw)) ? (raw as Record<string, string[]>) : {};
+
+const i18n = asRecord(value);
+const lists = asListRecord(value);
+
+const flatList = Array.isArray(value) ? (value as string[]) : [];
+
+const syllabus = Array.isArray(value)
+  ? (value as Array<{ title?: Record<string, string>; detail?: Record<string, string> }>)
+  : [];
+// Always offer one spare row so adding a step needs no extra click.
+const syllabusRows = [...syllabus, { title: {}, detail: {} }];
+
+const LOCALE_LABEL = { id: 'Bahasa Indonesia', en: 'English' } as const;
+const isBilingual = field.type === 'i18n' || field.type === 'i18nArea'
+  || field.type === 'i18nRich' || field.type === 'i18nList';
+---
+
+<div class="border-b border-steel-100 py-5 last:border-0">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <label class="block text-sm font-semibold text-navy-800" for={`f-${field.name}`}>
+      {field.label[lang]}
+      {field.required && <span class="ml-1 text-brand-600" aria-hidden="true">*</span>}
+    </label>
+    <code class="text-[0.6875rem] text-steel-300">{field.name}</code>
+  </div>
+
+  {field.help && (
+    <p class="mt-1 text-[0.75rem] leading-relaxed text-steel-400">{field.help[lang]}</p>
+  )}
+
+  <div class="mt-3">
+    {field.type === 'text' && (
+      <input
+        class:list={[input, (field.name === 'slug' || field.name === 'id') && mono]}
+        type="text" id={`f-${field.name}`} name={field.name}
+        value={typeof value === 'string' ? value : ''} required={field.required}
+      />
+    )}
+
+    {field.type === 'date' && (
+      <input class={input} type="date" id={`f-${field.name}`} name={field.name}
+        value={typeof value === 'string' ? value.slice(0, 10) : ''} required={field.required} />
+    )}
+
+    {field.type === 'number' && (
+      <input class={input} type="number" step="any" id={`f-${field.name}`} name={field.name}
+        value={typeof value === 'number' ? String(value) : ''} />
+    )}
+
+    {field.type === 'boolean' && (
+      <label class="inline-flex cursor-pointer items-center gap-2.5 text-sm text-steel-500">
+        <input type="checkbox" id={`f-${field.name}`} name={field.name}
+          checked={value === true} class="h-4 w-4 accent-[#e30613]" />
+        <span>{lang === 'en' ? 'Enabled' : 'Aktif'}</span>
+      </label>
+    )}
+
+    {field.type === 'select' && (
+      <select class={input} id={`f-${field.name}`} name={field.name}>
+        {(field.options ?? []).map((option) => (
+          <option value={option} selected={value === option}>{option}</option>
+        ))}
+      </select>
+    )}
+
+    {field.type === 'image' && (
+      <div class="flex flex-wrap items-center gap-3">
+        <input class:list={[input, mono, 'flex-1']} type="text" id={`f-${field.name}`} name={field.name}
+          value={typeof value === 'string' ? value : ''} placeholder="/media/…" />
+        <a href="/admin/media" target="_blank" rel="noopener" class="btn btn-ghost-dark btn-sm">
+          <Icon name="image" size={15} />
+          {lang === 'en' ? 'Media library' : 'Pustaka media'}
+        </a>
+        {typeof value === 'string' && value !== '' && (
+          <img src={value} alt="" class="h-12 w-auto border border-steel-100" loading="lazy" />
+        )}
+      </div>
+    )}
+
+    {field.type === 'list' && (
+      <textarea class={input} rows="5" id={`f-${field.name}`} name={field.name}
+      >{flatList.join('\n')}</textarea>
+    )}
+
+    {isBilingual && (
+      <div class="grid gap-4 lg:grid-cols-2">
+        {(['id', 'en'] as const).map((locale) => (
+          <div>
+            <span class="mb-1.5 block text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-steel-300">
+              {LOCALE_LABEL[locale]}
+            </span>
+
+            {field.type === 'i18n' && (
+              <input class={input} type="text"
+                id={locale === 'id' ? `f-${field.name}` : undefined}
+                name={`${field.name}.${locale}`}
+                value={i18n[locale] ?? ''} required={field.required && locale === 'id'} />
+            )}
+
+            {field.type === 'i18nArea' && (
+              <textarea class={input} rows="3"
+                id={locale === 'id' ? `f-${field.name}` : undefined}
+                name={`${field.name}.${locale}`}
+                required={field.required && locale === 'id'}>{i18n[locale] ?? ''}</textarea>
+            )}
+
+            {field.type === 'i18nRich' && (
+              <textarea class:list={[input, mono]} rows="12"
+                id={locale === 'id' ? `f-${field.name}` : undefined}
+                name={`${field.name}.${locale}`}
+                spellcheck="false">{i18n[locale] ?? ''}</textarea>
+            )}
+
+            {field.type === 'i18nList' && (
+              <textarea class={input} rows="6"
+                id={locale === 'id' ? `f-${field.name}` : undefined}
+                name={`${field.name}.${locale}`}>{(lists[locale] ?? []).join('\n')}</textarea>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {field.type === 'i18nRich' && (
+      <p class="mt-2 text-[0.75rem] leading-relaxed text-steel-400">
+        {lang === 'en'
+          ? 'HTML allowed: h2, h3, p, ul, ol, li, strong, em, a, blockquote, table, img. Anything else is stripped on save.'
+          : 'HTML yang diizinkan: h2, h3, p, ul, ol, li, strong, em, a, blockquote, table, img. Selain itu dibuang saat disimpan.'}
+      </p>
+    )}
+
+    {(field.type === 'i18nList' || field.type === 'list') && (
+      <p class="mt-2 text-[0.75rem] text-steel-400">
+        {lang === 'en' ? 'One item per line.' : 'Satu item per baris.'}
+      </p>
+    )}
+
+    {field.type === 'syllabus' && (
+      <div>
+        {syllabusRows.map((row, index) => (
+          <fieldset class="mb-3 border border-steel-100 p-4">
+            <legend class="px-2 font-display text-[0.6875rem] uppercase tracking-[0.12em] text-steel-300">
+              {lang === 'en' ? 'Step' : 'Tahap'} {index + 1}
+            </legend>
+            <div class="grid gap-3 lg:grid-cols-2">
+              {(['id', 'en'] as const).map((locale) => (
+                <div class="space-y-2">
+                  <span class="block text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-steel-300">
+                    {LOCALE_LABEL[locale]}
+                  </span>
+                  <input class={input} type="text"
+                    name={`${field.name}.${index}.title.${locale}`}
+                    value={row.title?.[locale] ?? ''}
+                    placeholder={lang === 'en' ? 'Step title' : 'Judul tahap'} />
+                  <textarea class={input} rows="3"
+                    name={`${field.name}.${index}.detail.${locale}`}
+                    placeholder={lang === 'en' ? 'What happens in this step' : 'Isi tahap ini'}
+                  >{row.detail?.[locale] ?? ''}</textarea>
+                </div>
+              ))}
+            </div>
+          </fieldset>
+        ))}
+        <p class="text-[0.75rem] leading-relaxed text-steel-400">
+          {lang === 'en'
+            ? 'Leave a step blank to remove it. A fresh empty step appears after each save.'
+            : 'Kosongkan sebuah tahap untuk menghapusnya. Tahap kosong baru muncul setelah disimpan.'}
+        </p>
+      </div>
+    )}
+  </div>
+</div>

@@ -1,0 +1,20 @@
+{
+  "name": "Rope Access Center — Training, Certification & Corporate Services",
+  "short_name": "RAC",
+  "description": "Rope access training, certification, and industrial services at height in Indonesia.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "orientation": "portrait-primary",
+  "lang": "id-ID",
+  "dir": "ltr",
+  "categories": ["business", "education", "productivity"],
+  "icons": [
+    { "src": "/brand/icon-96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "/brand/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/brand/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/brand/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

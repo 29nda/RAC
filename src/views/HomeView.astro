@@ -1,0 +1,365 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import {
+  publishedCourses, publishedServices, publishedPosts,
+  publishedFaqs, publishedTestimonials, getPage,
+} from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import {
+  graph, organizationSchema, localBusinessSchema, websiteSchema,
+  faqSchema, itemListSchema,
+} from '../lib/seo';
+import { whatsappUrl } from '../lib/whatsapp';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import StatsBar from '../components/StatsBar.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import CourseCard from '../components/CourseCard.astro';
+import PostCard from '../components/PostCard.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
+import TrustStrip from '../components/TrustStrip.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'home');
+const site = getSiteUrl(Astro.locals);
+
+const blocks = (page.blocks ?? {}) as Record<string, Record<Locale, string>>;
+const block = (key: string) => pick(blocks[key], locale);
+
+const services = publishedServices(content).filter((x) => x.featured).slice(0, 4);
+const courses = publishedCourses(content).filter((x) => x.featured).slice(0, 3);
+const posts = publishedPosts(content).slice(0, 3);
+const faqs = publishedFaqs(content).slice(0, 5);
+const testimonials = publishedTestimonials(content).slice(0, 3);
+
+const heroTitle = pick(page.heroTitle, locale);
+const heroLines = heroTitle.split('\n');
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  localBusinessSchema(site, s, locale),
+  websiteSchema(site, s, locale),
+  faqSchema(faqs, locale),
+  itemListSchema(site, locale === 'id' ? 'Layanan RAC' : 'RAC Services',
+    publishedServices(content).map((service) => ({
+      name: pick(service.title, locale),
+      description: pick(service.summary, locale),
+      path: localizedPath('services', locale, service.slug),
+    }))),
+]);
+
+const ABOUT_PILLARS = [
+  {
+    icon: 'shield-check',
+    title: { id: 'Keselamatan Utama', en: 'Safety First' },
+    body: {
+      id: 'Setiap keputusan diuji terhadap satu pertanyaan: apakah semua orang pulang utuh?',
+      en: 'Every decision is tested against one question: does everyone go home whole?',
+    },
+  },
+  {
+    icon: 'target',
+    title: { id: 'Standar Global', en: 'Global Standard' },
+    body: {
+      id: 'Asesmen independen IRATA dan BNSP — kami tidak menilai peserta kami sendiri.',
+      en: 'Independent IRATA and BNSP assessment — we do not grade our own trainees.',
+    },
+  },
+  {
+    icon: 'users',
+    title: { id: 'Tim Berpengalaman', en: 'Experienced Team' },
+    body: {
+      id: 'Instruktur Level 3 dengan jam kerja lapangan nyata, bukan hanya jam mengajar.',
+      en: 'Level 3 instructors with real field hours behind them, not only teaching hours.',
+    },
+  },
+] as const;
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="home"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+>
+  <!-- ============================== Hero ============================== -->
+  <section class="relative overflow-hidden bg-navy-800 text-white">
+    <div class="absolute inset-0 grid-noise opacity-70" aria-hidden="true"></div>
+    <div
+      class="absolute inset-y-0 right-0 w-full bg-[radial-gradient(ellipse_at_75%_35%,rgba(227,6,19,0.22),transparent_58%)]"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="absolute -right-40 top-0 hidden h-full w-[34rem] skew-x-[-13deg] bg-brand-600/10 md:block"
+      aria-hidden="true"
+    ></div>
+
+    <div class="container-rac relative pb-32 pt-14 lg:pb-40 lg:pt-20">
+      <div class="grid items-center gap-10 lg:grid-cols-12">
+        <div class="lg:col-span-7">
+          <p class="eyebrow mb-6">{pick(page.heroEyebrow, locale)}</p>
+
+          <h1 class="text-[2.25rem] leading-[1.06] sm:text-[3rem] lg:text-[3.25rem] xl:text-[3.75rem]">
+            {heroLines.map((line, index) => (
+              <>
+                {index > 0 && <br />}
+                {line.split(' ').map((word, wordIndex) => (
+                  <>
+                    {wordIndex > 0 && ' '}
+                    <span class={wordIndex === 1 ? 'text-brand-600' : ''}>{word}</span>
+                  </>
+                ))}
+              </>
+            ))}
+          </h1>
+
+          <p class="mt-7 max-w-xl text-base leading-relaxed text-white/70 lg:text-lg">
+            {pick(page.heroSubtitle, locale)}
+          </p>
+
+          <div class="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <a href={localizedPath('training', locale)} class="btn btn-primary">
+              {t('cta.explore')}
+              <Icon name="arrow-right" size={16} />
+            </a>
+            <a href={localizedPath('services', locale)} class="btn btn-ghost-light">
+              {t('cta.ourServices')}
+              <Icon name="arrow-right" size={16} />
+            </a>
+            <a
+              href={whatsappUrl(s, locale, { sourceUrl: Astro.url.href })}
+              class="btn btn-whatsapp"
+              target="_blank"
+              rel="noopener"
+              data-wa-cta="hero"
+            >
+              <Icon name="whatsapp" size={17} filled />
+              {t('cta.whatsappShort')}
+            </a>
+          </div>
+        </div>
+
+        <div class="relative hidden lg:col-span-5 lg:block">
+          <img
+            src="/brand/climber-420.webp"
+            srcset="/brand/climber-240.webp 240w, /brand/climber-420.webp 420w"
+            sizes="(min-width: 1024px) 340px, 240px"
+            width="420"
+            height="883"
+            alt={locale === 'id'
+              ? 'Ilustrasi teknisi akses tali RAC menuruni tali kerja'
+              : 'Illustration of a RAC rope access technician descending a working line'}
+            class="mx-auto h-[26rem] w-auto drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] xl:h-[30rem]"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ Stats ============================== -->
+  <div class="relative z-10 -mt-24 lg:-mt-28">
+    <div class="container-rac">
+      <StatsBar locale={locale} stats={s.stats} floating />
+    </div>
+  </div>
+
+  <!-- =========================== Services ============================ -->
+  <section class="py-16 lg:py-24">
+    <div class="container-rac">
+      <SectionHeading
+        eyebrow={block('servicesEyebrow')}
+        title={block('servicesTitle')}
+        intro={block('servicesIntro')}
+        align="center"
+      />
+
+      <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {services.map((service) => <ServiceCard locale={locale} service={service} compact />)}
+      </div>
+
+      <div class="mt-10 text-center">
+        <a href={localizedPath('services', locale)} class="btn btn-ghost-dark">
+          {t('cta.viewAll')} — {t('nav.services')}
+          <Icon name="arrow-right" size={16} />
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ About ============================== -->
+  <section class="bg-steel-50 py-16 lg:py-24">
+    <div class="container-rac">
+      <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+        <div class="reveal relative overflow-hidden bg-navy-800 p-10 lg:p-14">
+          <div class="absolute inset-0 grid-noise opacity-60" aria-hidden="true"></div>
+          <div
+            class="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-brand-600/20 blur-3xl"
+            aria-hidden="true"
+          ></div>
+          <img
+            src="/brand/climber-420.webp"
+            width="420"
+            height="883"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            decoding="async"
+            class="relative mx-auto h-64 w-auto opacity-90 lg:h-80"
+          />
+          <p class="relative mt-8 text-center font-display text-sm uppercase tracking-[0.2em] text-white/45">
+            {pick(s.tagline, locale)}
+          </p>
+        </div>
+
+        <div>
+          <SectionHeading
+            eyebrow={block('aboutEyebrow')}
+            title={block('aboutTitle')}
+            intro={block('aboutBody')}
+          />
+
+          <ul class="reveal mt-9 grid gap-6 sm:grid-cols-3">
+            {ABOUT_PILLARS.map((pillar) => (
+              <li>
+                <Icon name={pillar.icon} size={26} class="text-brand-600" />
+                <h3 class="mt-3 text-sm text-navy-800">{pick(pillar.title, locale)}</h3>
+                <p class="mt-1.5 text-[0.8125rem] leading-relaxed text-steel-400">
+                  {pick(pillar.body, locale)}
+                </p>
+              </li>
+            ))}
+          </ul>
+
+          <a href={localizedPath('about', locale)} class="btn btn-primary reveal mt-9">
+            {locale === 'id' ? 'Selengkapnya Tentang Kami' : 'More About Us'}
+            <Icon name="arrow-right" size={16} />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ Trust ============================== -->
+  <section class="py-16 lg:py-20">
+    <div class="container-rac">
+      <SectionHeading
+        eyebrow={block('trustEyebrow')}
+        title={block('trustTitle')}
+        align="center"
+      />
+      <div class="mt-10">
+        <TrustStrip locale={locale} items={content.accreditations} />
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== Courses ============================= -->
+  <section class="bg-steel-50 py-16 lg:py-24">
+    <div class="container-rac">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <SectionHeading
+          eyebrow={locale === 'id' ? 'Program Unggulan' : 'Featured Programmes'}
+          title={locale === 'id' ? 'Mulai dari Level Anda' : 'Start at Your Level'}
+        />
+        <a href={localizedPath('schedule', locale)} class="btn btn-ghost-dark reveal">
+          {t('nav.schedule')}
+          <Icon name="calendar" size={16} />
+        </a>
+      </div>
+
+      <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {courses.map((course) => <CourseCard locale={locale} course={course} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= Testimonials =========================== -->
+  {testimonials.length > 0 && (
+    <section class="py-16 lg:py-24">
+      <div class="container-rac">
+        <SectionHeading
+          eyebrow={block('testimonialEyebrow')}
+          title={block('testimonialTitle')}
+          align="center"
+        />
+        <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {testimonials.map((testimonial) => (
+            <TestimonialCard locale={locale} testimonial={testimonial} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ============================== FAQ ============================== -->
+  {faqs.length > 0 && (
+    <section class="bg-steel-50 py-16 lg:py-24">
+      <div class="container-rac">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+          <div class="lg:col-span-5">
+            <SectionHeading
+              eyebrow="FAQ"
+              title={t('section.faqTitle')}
+              intro={locale === 'id'
+                ? 'Pertanyaan yang paling sering sampai ke meja kami, dijawab langsung.'
+                : 'The questions that reach our desk most often, answered directly.'}
+            />
+            <a href={localizedPath('faq', locale)} class="btn btn-ghost-dark reveal mt-8">
+              {t('cta.viewAll')} FAQ
+              <Icon name="arrow-right" size={16} />
+            </a>
+          </div>
+          <div class="lg:col-span-7">
+            <FaqAccordion locale={locale} faqs={faqs} />
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- ============================ Articles =========================== -->
+  {posts.length > 0 && (
+    <section class="py-16 lg:py-24">
+      <div class="container-rac">
+        <div class="flex flex-wrap items-end justify-between gap-6">
+          <SectionHeading
+            eyebrow={locale === 'id' ? 'Dari Lapangan' : 'From the Field'}
+            title={locale === 'id' ? 'Artikel Terbaru' : 'Latest Insights'}
+          />
+          <a href={localizedPath('blog', locale)} class="btn btn-ghost-dark reveal">
+            {t('cta.viewAll')}
+            <Icon name="arrow-right" size={16} />
+          </a>
+        </div>
+        <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {posts.map((post) => <PostCard locale={locale} post={post} />)}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={block('ctaEyebrow')}
+    title={block('ctaTitle')}
+  />
+</SiteLayout>

@@ -1,0 +1,186 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { listEnquiries } from '../../lib/db';
+import { getDB } from '../../lib/env';
+
+const lang = Astro.cookies.get('rac_admin_lang')?.value === 'en' ? 'en' : 'id';
+const T = (id: string, en: string) => (lang === 'en' ? en : id);
+
+const bound = Boolean(getDB(Astro.locals));
+const enquiries = await listEnquiries(Astro.locals, 200);
+
+const STATUSES = ['new', 'contacted', 'quoted', 'won', 'lost', 'spam'];
+const STATUS_TONE: Record<string, string> = {
+  new: 'bg-brand-50 text-brand-700 border-brand-200',
+  contacted: 'bg-amber-50 text-amber-700 border-amber-200',
+  quoted: 'bg-navy-50 text-navy-700 border-navy-200',
+  won: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  lost: 'bg-steel-100 text-steel-400 border-steel-200',
+  spam: 'bg-steel-100 text-steel-400 border-steel-200',
+};
+
+const counts = STATUSES.map((status) => ({
+  status,
+  count: enquiries.filter((enquiry) => enquiry.status === status).length,
+}));
+---
+
+<AdminLayout title={T('Pesan Masuk', 'Enquiries')} section="enquiries" wide>
+  <header>
+    <h1 class="text-2xl text-navy-800">{T('Pesan Masuk', 'Enquiries')}</h1>
+    <p class="mt-1.5 text-sm text-steel-400">
+      {T(
+        'Setiap pengiriman formulir kontak tersimpan di sini, lengkap dengan tautan balas cepat via WhatsApp.',
+        'Every contact form submission lands here, with a one-click WhatsApp reply link.',
+      )}
+    </p>
+  </header>
+
+  {!bound && (
+    <div class="mt-6 border-l-4 border-amber-500 bg-amber-50 p-4 text-[0.8125rem] leading-relaxed text-amber-900">
+      <p class="font-semibold">{T('Database belum terhubung.', 'No database is bound.')}</p>
+      <p class="mt-1.5">
+        {T(
+          'Formulir kontak tetap berfungsi dan tetap mengarahkan pengunjung ke WhatsApp, tetapi pesan tidak dapat diarsipkan sampai D1 terhubung.',
+          'The contact form still works and still hands visitors to WhatsApp, but submissions cannot be archived until D1 is bound.',
+        )}
+      </p>
+    </div>
+  )}
+
+  <ul class="mt-6 flex flex-wrap gap-2">
+    {counts.map((entry) => (
+      <li class:list={['border px-3 py-1.5 text-[0.75rem] font-semibold uppercase tracking-wide', STATUS_TONE[entry.status]]}>
+        {entry.status} · {entry.count}
+      </li>
+    ))}
+  </ul>
+
+  {enquiries.length === 0 ? (
+    <p class="card mt-6 p-10 text-center text-sm text-steel-300">
+      {T('Belum ada pesan masuk.', 'No enquiries yet.')}
+    </p>
+  ) : (
+    <ul class="mt-6 space-y-4">
+      {enquiries.map((enquiry) => {
+        const waHref = `https://wa.me/${enquiry.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+          lang === 'en'
+            ? `Hello ${enquiry.name}, thank you for contacting Rope Access Center regarding ${enquiry.subject ?? 'your enquiry'}.`
+            : `Halo ${enquiry.name}, terima kasih telah menghubungi Rope Access Center mengenai ${enquiry.subject ?? 'pertanyaan Anda'}.`,
+        )}`;
+
+        return (
+          <li class="card p-5" data-enquiry={enquiry.id}>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div class="min-w-0">
+                <h2 class="text-base font-semibold text-navy-800">
+                  {enquiry.name}
+                  {enquiry.company && <span class="font-normal text-steel-400"> · {enquiry.company}</span>}
+                </h2>
+                <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8125rem] text-steel-400">
+                  <a href={`mailto:${enquiry.email}`} class="hover:text-navy-800">{enquiry.email}</a>
+                  <span aria-hidden="true">·</span>
+                  <a href={`tel:+${enquiry.phone}`} class="hover:text-navy-800">+{enquiry.phone}</a>
+                  <span aria-hidden="true">·</span>
+                  <span class="uppercase">{enquiry.locale}</span>
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <span class:list={['border px-2.5 py-1 text-[0.6875rem] font-semibold uppercase tracking-wide', STATUS_TONE[enquiry.status]]}>
+                  {enquiry.status}
+                </span>
+                <time class="text-[0.75rem] text-steel-300" datetime={enquiry.created_at}>
+                  {enquiry.created_at.slice(0, 16).replace('T', ' ')}
+                </time>
+              </div>
+            </div>
+
+            {enquiry.subject && (
+              <p class="mt-3 font-display text-[0.6875rem] uppercase tracking-[0.12em] text-brand-600">
+                {enquiry.subject}
+              </p>
+            )}
+
+            <p class="mt-2 whitespace-pre-line text-[0.875rem] leading-relaxed text-steel-500">
+              {enquiry.message}
+            </p>
+
+            {enquiry.page_url && (
+              <p class="mt-3 text-[0.75rem] text-steel-300">
+                {T('Dikirim dari', 'Sent from')}: <code>{enquiry.page_url}</code>
+              </p>
+            )}
+
+            <div class="mt-4 flex flex-wrap items-center gap-2 border-t border-steel-100 pt-4">
+              <a href={waHref} target="_blank" rel="noopener" class="btn btn-whatsapp btn-sm">
+                <Icon name="whatsapp" size={14} filled />
+                {T('Balas via WhatsApp', 'Reply on WhatsApp')}
+              </a>
+
+              <label class="sr-only" for={`status-${enquiry.id}`}>{T('Status', 'Status')}</label>
+              <select
+                id={`status-${enquiry.id}`}
+                class="border border-steel-200 px-2.5 py-2 text-[0.8125rem] focus:border-navy-800 focus:outline-none"
+                data-status={enquiry.id}
+              >
+                {STATUSES.map((status) => (
+                  <option value={status} selected={status === enquiry.status}>{status}</option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                class="ml-auto inline-flex items-center gap-1.5 text-[0.8125rem] text-steel-300 transition-colors hover:text-brand-600"
+                data-delete={enquiry.id}
+              >
+                <Icon name="trash" size={14} />
+                {T('Hapus', 'Delete')}
+              </button>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</AdminLayout>
+
+<script
+  nonce={Astro.locals.cspNonce}
+  is:inline
+  define:vars={{
+    savedText: T('Status diperbarui.', 'Status updated.'),
+    deletedText: T('Pesan dihapus.', 'Enquiry deleted.'),
+    failText: T('Gagal memperbarui.', 'Update failed.'),
+    confirmDelete: T('Hapus pesan ini secara permanen?', 'Delete this enquiry permanently?'),
+  }}
+>
+  (function () {
+    document.querySelectorAll('[data-status]').forEach(function (select) {
+      select.addEventListener('change', function () {
+        window.RAC_ADMIN.post('/api/admin/enquiries', {
+          id: select.getAttribute('data-status'),
+          action: 'status',
+          status: select.value,
+        }).then(function (result) {
+          window.RAC_ADMIN.toast(result.ok ? savedText : failText, result.ok);
+        });
+      });
+    });
+
+    document.querySelectorAll('[data-delete]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        if (!window.confirm(confirmDelete)) return;
+        var id = button.getAttribute('data-delete');
+        window.RAC_ADMIN.post('/api/admin/enquiries', { id: id, action: 'delete' })
+          .then(function (result) {
+            if (!result.ok) { window.RAC_ADMIN.toast(failText, false); return; }
+            var card = document.querySelector('[data-enquiry="' + id + '"]');
+            if (card) card.remove();
+            window.RAC_ADMIN.toast(deletedText, true);
+          });
+      });
+    });
+  })();
+</script>

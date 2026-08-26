@@ -1,0 +1,60 @@
+---
+/**
+ * Bilingual catch-all router.
+ *
+ * Both languages share one entry point so that a page exists at exactly one
+ * URL per locale (`/pelatihan/irata-level-1` and `/en/training/irata-level-1`)
+ * with no duplicated route files to drift apart. `matchPath` owns the mapping;
+ * this file only dispatches to a view.
+ */
+import { matchPath, localizedPath } from '../i18n/config';
+import { getContent, findCourse, findService, findPost } from '../lib/content';
+
+import HomeView from '../views/HomeView.astro';
+import AboutView from '../views/AboutView.astro';
+import TrainingListView from '../views/TrainingListView.astro';
+import CourseDetailView from '../views/CourseDetailView.astro';
+import CertificationView from '../views/CertificationView.astro';
+import ServiceListView from '../views/ServiceListView.astro';
+import ServiceDetailView from '../views/ServiceDetailView.astro';
+import ScheduleView from '../views/ScheduleView.astro';
+import BlogListView from '../views/BlogListView.astro';
+import PostDetailView from '../views/PostDetailView.astro';
+import FaqView from '../views/FaqView.astro';
+import ContactView from '../views/ContactView.astro';
+import LegalView from '../views/LegalView.astro';
+
+const match = matchPath(Astro.url.pathname);
+if (!match) return Astro.rewrite('/404');
+
+const { locale, key, slug } = match;
+const content = await getContent(Astro.locals);
+
+// A detail route with no matching item is a 404, not an empty page.
+if (slug) {
+  const exists =
+    (key === 'training' && findCourse(content, slug)) ||
+    (key === 'services' && findService(content, slug)) ||
+    (key === 'blog' && findPost(content, slug));
+  if (!exists) return Astro.rewrite('/404');
+}
+
+// `/en` and `/` are the same page; keep the trailing-slash-free canonical form.
+if (Astro.url.pathname !== localizedPath(key, locale, slug)) {
+  return Astro.redirect(localizedPath(key, locale, slug), 301);
+}
+---
+
+{key === 'home' && <HomeView locale={locale} content={content} />}
+{key === 'about' && <AboutView locale={locale} content={content} />}
+{key === 'training' && !slug && <TrainingListView locale={locale} content={content} />}
+{key === 'training' && slug && <CourseDetailView locale={locale} content={content} slug={slug} />}
+{key === 'certification' && <CertificationView locale={locale} content={content} />}
+{key === 'services' && !slug && <ServiceListView locale={locale} content={content} />}
+{key === 'services' && slug && <ServiceDetailView locale={locale} content={content} slug={slug} />}
+{key === 'schedule' && <ScheduleView locale={locale} content={content} />}
+{key === 'blog' && !slug && <BlogListView locale={locale} content={content} />}
+{key === 'blog' && slug && <PostDetailView locale={locale} content={content} slug={slug} />}
+{key === 'faq' && <FaqView locale={locale} content={content} />}
+{key === 'contact' && <ContactView locale={locale} content={content} />}
+{(key === 'privacy' || key === 'terms') && <LegalView locale={locale} content={content} pageKey={key} />}

@@ -1,0 +1,100 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { getPage, publishedServices, publishedFaqs } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, itemListSchema, serviceSchema, faqSchema } from '../lib/seo';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'services');
+const site = getSiteUrl(Astro.locals);
+
+const services = publishedServices(content);
+const faqs = publishedFaqs(content).filter((f) => f.group === 'services').slice(0, 5);
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.services'), path: localizedPath('services', locale) },
+];
+
+const jsonLd = graph([
+  breadcrumbSchema(site, trail),
+  itemListSchema(site, locale === 'id' ? 'Layanan RAC' : 'RAC Services',
+    services.map((service) => ({
+      name: pick(service.title, locale),
+      description: pick(service.summary, locale),
+      path: localizedPath('services', locale, service.slug),
+    }))),
+  ...services.map((service) => serviceSchema(site, service, locale)),
+  faqSchema(faqs, locale),
+]);
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="services"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+  whatsappSubject={locale === 'id' ? 'layanan industri RAC' : 'RAC industrial services'}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={pick(page.heroTitle, locale)}
+    subtitle={pick(page.heroSubtitle, locale)}
+    trail={trail}
+  />
+
+  <section class="py-16 lg:py-20">
+    <div class="container-rac">
+      <p class="max-w-3xl text-base leading-relaxed text-steel-400">{pick(page.intro, locale)}</p>
+
+      <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {services.map((service) => <ServiceCard locale={locale} service={service} />)}
+      </div>
+    </div>
+  </section>
+
+  {faqs.length > 0 && (
+    <section class="bg-steel-50 py-16 lg:py-20">
+      <div class="container-rac">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+          <div class="lg:col-span-5">
+            <SectionHeading eyebrow="FAQ" title={t('section.faqTitle')} />
+          </div>
+          <div class="lg:col-span-7">
+            <FaqAccordion locale={locale} faqs={faqs} />
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Punya pekerjaan yang sulit dijangkau?' : 'Got work that is hard to reach?'}
+    title={locale === 'id'
+      ? 'Kirim Detailnya,\nKami Balas dengan Penawaran.'
+      : 'Send Us the Details,\nWe Will Send Back a Quotation.'}
+    subject={locale === 'id' ? 'penawaran layanan industri' : 'an industrial services quotation'}
+  />
+</SiteLayout>

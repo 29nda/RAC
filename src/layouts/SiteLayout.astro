@@ -1,0 +1,69 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppFloat from '../components/WhatsAppFloat.astro';
+import type { Locale, RouteKey } from '../i18n/config';
+import type { SiteContent } from '../lib/types';
+import { publishedCourses, publishedServices } from '../lib/content';
+
+interface Props {
+  locale: Locale;
+  routeKey: RouteKey;
+  slug?: string;
+  content: SiteContent;
+  title: string;
+  description: string;
+  jsonLd?: string;
+  image?: string;
+  imageAlt?: string;
+  noindex?: boolean;
+  ogType?: 'website' | 'article';
+  publishedTime?: string;
+  modifiedTime?: string;
+  /** Pre-filled into the floating WhatsApp message. */
+  whatsappSubject?: string;
+}
+
+const {
+  locale, routeKey, slug, content, title, description, jsonLd,
+  image, imageAlt, noindex, ogType, publishedTime, modifiedTime, whatsappSubject,
+} = Astro.props;
+
+const courses = publishedCourses(content);
+const services = publishedServices(content);
+---
+
+<BaseLayout
+  locale={locale}
+  routeKey={routeKey}
+  slug={slug}
+  title={title}
+  description={description}
+  settings={content.settings}
+  jsonLd={jsonLd}
+  image={image}
+  imageAlt={imageAlt}
+  noindex={noindex}
+  ogType={ogType}
+  publishedTime={publishedTime}
+  modifiedTime={modifiedTime}
+>
+  <slot name="head" slot="head" />
+
+  <Header
+    locale={locale}
+    routeKey={routeKey}
+    slug={slug}
+    settings={content.settings}
+    courses={courses}
+    services={services}
+  />
+
+  <main id="main">
+    <slot />
+  </main>
+
+  <Footer locale={locale} settings={content.settings} courses={courses} services={services} />
+  <WhatsAppFloat locale={locale} settings={content.settings} subject={whatsappSubject} />
+</BaseLayout>

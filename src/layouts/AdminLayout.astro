@@ -1,0 +1,231 @@
+---
+import '../styles/global.css';
+import Icon from '../components/Icon.astro';
+import { COLLECTIONS } from '../lib/adminSchema';
+import { ensureCsrfToken, isSecureRequest } from '../lib/auth';
+import { getDB, getMedia, getCache } from '../lib/env';
+
+interface Props {
+  title: string;
+  /** Highlights the matching sidebar entry. */
+  section?: string;
+  wide?: boolean;
+}
+
+const { title, section, wide = false } = Astro.props;
+const nonce = Astro.locals.cspNonce;
+const admin = Astro.locals.admin;
+
+// Every dashboard form carries this token; the cookie half is set here.
+ensureCsrfToken(Astro.cookies, isSecureRequest(Astro.request));
+
+const lang = Astro.cookies.get('rac_admin_lang')?.value === 'en' ? 'en' : 'id';
+const T = (id: string, en: string) => (lang === 'en' ? en : id);
+
+const bindings = {
+  db: Boolean(getDB(Astro.locals)),
+  media: Boolean(getMedia(Astro.locals)),
+  cache: Boolean(getCache(Astro.locals)),
+};
+
+const nav = [
+  { href: '/admin', icon: 'layers', label: T('Ringkasan', 'Overview'), key: 'overview' },
+  { href: '/admin/enquiries', icon: 'mail', label: T('Pesan Masuk', 'Enquiries'), key: 'enquiries' },
+  ...COLLECTIONS.map((collection) => ({
+    href: `/admin/content/${collection.name}`,
+    icon: collection.icon,
+    label: collection.label[lang],
+    key: collection.name,
+  })),
+  { href: '/admin/media', icon: 'image', label: T('Media', 'Media'), key: 'media' },
+];
+---
+
+<!doctype html>
+<html lang={lang === 'en' ? 'en' : 'id'}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>{title} · RAC Dashboard</title>
+    <link rel="icon" href="/brand/icon-192.png" type="image/png" />
+    <meta name="theme-color" content="#0d1b2a" />
+  </head>
+
+  <body class="bg-steel-50">
+    <a href="#admin-main" class="skip-link">{T('Lompat ke konten', 'Skip to content')}</a>
+
+    <div class="flex min-h-dvh flex-col lg:flex-row">
+      <!-- Sidebar -->
+      <aside class="flex-none border-b border-navy-700 bg-navy-800 text-white lg:min-h-dvh lg:w-64 lg:border-b-0 lg:border-r">
+        <div class="flex items-center justify-between gap-3 p-4 lg:block">
+          <a href="/admin" class="flex items-center gap-2.5">
+            <img
+              src="/brand/mono-onDark-96.webp"
+              width="72"
+              height="23"
+              alt="RAC"
+              class="h-6 w-auto"
+              decoding="async"
+            />
+            <span class="font-display text-[0.6875rem] uppercase tracking-[0.18em] text-white/45">
+              Dashboard
+            </span>
+          </a>
+
+          <button
+            type="button"
+            id="admin-nav-toggle"
+            class="inline-flex h-10 w-10 items-center justify-center text-white lg:hidden"
+            aria-expanded="false"
+            aria-controls="admin-nav"
+            aria-label={T('Buka menu', 'Open menu')}
+          >
+            <Icon name="menu" size={22} />
+          </button>
+        </div>
+
+        <nav id="admin-nav" class="hidden px-3 pb-4 lg:block" aria-label={T('Menu dashboard', 'Dashboard menu')}>
+          <ul class="space-y-0.5">
+            {nav.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class:list={[
+                    'flex items-center gap-3 px-3 py-2.5 text-sm transition-colors',
+                    section === item.key
+                      ? 'bg-brand-600 font-semibold text-white'
+                      : 'text-white/65 hover:bg-white/5 hover:text-white',
+                  ]}
+                  aria-current={section === item.key ? 'page' : undefined}
+                >
+                  <Icon name={item.icon as 'layers'} size={17} />
+                  <span class="truncate">{item.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <div class="mt-6 border-t border-white/10 pt-4">
+            <p class="px-3 text-[0.6875rem] uppercase tracking-[0.14em] text-white/35">
+              {T('Status Layanan', 'Service status')}
+            </p>
+            <ul class="mt-2.5 space-y-1.5 px-3 text-[0.75rem]">
+              {[
+                { label: 'D1 (database)', ok: bindings.db },
+                { label: 'KV (cache)', ok: bindings.cache },
+                { label: 'R2 (media)', ok: bindings.media },
+              ].map((binding) => (
+                <li class="flex items-center gap-2 text-white/55">
+                  <span
+                    class:list={['h-1.5 w-1.5 flex-none rounded-full', binding.ok ? 'bg-emerald-400' : 'bg-amber-400']}
+                    aria-hidden="true"
+                  ></span>
+                  {binding.label}
+                  <span class="ml-auto text-white/35">
+                    {binding.ok ? T('aktif', 'bound') : T('belum', 'unbound')}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="mt-6 border-t border-white/10 px-3 pt-4">
+            {admin && <p class="truncate text-[0.75rem] text-white/45">{admin.email}</p>}
+
+            <div class="mt-3 flex items-center gap-2">
+              <a
+                href={`/admin/lang/${lang === 'en' ? 'id' : 'en'}`}
+                class="border border-white/20 px-2 py-1 text-[0.6875rem] font-bold tracking-[0.1em] text-white/60 transition-colors hover:text-white"
+              >{lang === 'en' ? 'ID' : 'EN'}</a>
+
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener"
+                class="flex items-center gap-1.5 text-[0.75rem] text-white/55 transition-colors hover:text-white"
+              >
+                <Icon name="external-link" size={13} />
+                {T('Lihat situs', 'View site')}
+              </a>
+
+              <button
+                type="button"
+                id="admin-logout"
+                class="ml-auto flex items-center gap-1.5 text-[0.75rem] text-white/55 transition-colors hover:text-brand-500"
+              >
+                <Icon name="logout" size={14} />
+                {T('Keluar', 'Sign out')}
+              </button>
+            </div>
+          </div>
+        </nav>
+      </aside>
+
+      <!-- Main -->
+      <div class="min-w-0 flex-1">
+        <main id="admin-main" class:list={['mx-auto px-4 py-6 lg:px-8 lg:py-9', wide ? 'max-w-none' : 'max-w-5xl']}>
+          <slot />
+        </main>
+      </div>
+    </div>
+
+    <div
+      id="admin-toast"
+      class="pointer-events-none fixed bottom-5 left-1/2 z-50 hidden -translate-x-1/2 px-5 py-3 text-sm font-medium text-white shadow-2xl"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+    <script nonce={nonce} is:inline>
+      window.RAC_ADMIN = {
+        csrf: (document.cookie.match(/(?:^|;\s*)rac_csrf=([^;]+)/) || [])[1] || '',
+
+        toast: function (message, ok) {
+          var el = document.getElementById('admin-toast');
+          if (!el) return;
+          el.textContent = message;
+          el.style.backgroundColor = ok === false ? '#bf0510' : '#0d1b2a';
+          el.classList.remove('hidden');
+          window.clearTimeout(el._timer);
+          el._timer = window.setTimeout(function () { el.classList.add('hidden'); }, 4000);
+        },
+
+        post: function (url, data) {
+          var body = data instanceof FormData ? data : new FormData();
+          if (!(data instanceof FormData)) {
+            Object.keys(data || {}).forEach(function (key) { body.append(key, data[key]); });
+          }
+          if (!body.get('csrf')) body.append('csrf', window.RAC_ADMIN.csrf);
+
+          return fetch(url, { method: 'POST', body: body, headers: { Accept: 'application/json' } })
+            .then(function (response) {
+              return response.json().catch(function () { return {}; })
+                .then(function (json) { return { ok: response.ok, status: response.status, data: json }; });
+            });
+        },
+      };
+
+      (function () {
+        var toggle = document.getElementById('admin-nav-toggle');
+        var nav = document.getElementById('admin-nav');
+        if (toggle && nav) {
+          toggle.addEventListener('click', function () {
+            var open = nav.classList.contains('hidden');
+            nav.classList.toggle('hidden', !open);
+            toggle.setAttribute('aria-expanded', String(open));
+          });
+        }
+
+        var logout = document.getElementById('admin-logout');
+        if (logout) {
+          logout.addEventListener('click', function () {
+            window.RAC_ADMIN.post('/api/admin/logout', {}).then(function (result) {
+              window.location.href = (result.data && result.data.redirect) || '/admin/login';
+            });
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

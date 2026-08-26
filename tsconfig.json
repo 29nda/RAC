@@ -1,0 +1,14 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*.ts", "**/*.astro", "**/*.mjs"],
+  "exclude": ["dist", "node_modules", ".wrangler"],
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "allowJs": true,
+    "types": ["node", "astro/client", "@cloudflare/workers-types/2023-07-01"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  }
+}

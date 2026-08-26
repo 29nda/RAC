@@ -1,0 +1,59 @@
+---
+import type { Locale } from '../i18n/config';
+import Breadcrumbs from './Breadcrumbs.astro';
+
+interface Props {
+  locale: Locale;
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  trail?: Array<{ name: string; path: string }>;
+  compact?: boolean;
+}
+
+const { locale, eyebrow, title, subtitle, trail, compact = false } = Astro.props;
+// Authors write hard breaks with "\n"; render them as real line breaks.
+const lines = title.split('\n');
+---
+
+<section class="relative overflow-hidden bg-navy-800 text-white">
+  <div class="absolute inset-0 grid-noise opacity-60" aria-hidden="true"></div>
+  <div
+    class="absolute -right-24 top-0 h-full w-[38rem] skew-x-[-14deg] bg-gradient-to-l from-brand-600/25 to-transparent"
+    aria-hidden="true"
+  ></div>
+  <img
+    src="/brand/climber-240.webp"
+    width="240"
+    height="504"
+    alt=""
+    aria-hidden="true"
+    loading="lazy"
+    decoding="async"
+    class="pointer-events-none absolute -right-6 bottom-0 hidden h-[86%] w-auto opacity-[0.07] lg:block"
+  />
+
+  <div class:list={['container-rac relative', compact ? 'py-12 lg:py-16' : 'py-16 lg:py-24']}>
+    {trail && trail.length > 0 && (
+      <div class="mb-6">
+        <Breadcrumbs locale={locale} trail={trail} />
+      </div>
+    )}
+
+    {eyebrow && <p class="eyebrow mb-4">{eyebrow}</p>}
+
+    <h1 class:list={['max-w-4xl', compact ? 'text-3xl lg:text-4xl' : 'text-[2.125rem] leading-[1.1] sm:text-5xl lg:text-[3.5rem]']}>
+      {lines.map((line, index) => (
+        <>{index > 0 && <br />}{line}</>
+      ))}
+    </h1>
+
+    {subtitle && (
+      <p class="mt-6 max-w-2xl text-base leading-relaxed text-white/70 lg:text-lg">
+        {subtitle}
+      </p>
+    )}
+
+    <slot />
+  </div>
+</section>

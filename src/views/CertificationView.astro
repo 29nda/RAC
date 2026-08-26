@@ -1,0 +1,193 @@
+---
+import type { Locale } from '../i18n/config';
+import { localizedPath } from '../i18n/config';
+import { useTranslations, pick } from '../i18n/ui';
+import type { SiteContent } from '../lib/types';
+import { getPage, publishedCourses, publishedFaqs } from '../lib/content';
+import { getSiteUrl } from '../lib/env';
+import { graph, breadcrumbSchema, faqSchema, organizationSchema } from '../lib/seo';
+import { sanitizeHtml } from '../lib/security';
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import CourseCard from '../components/CourseCard.astro';
+import FaqAccordion from '../components/FaqAccordion.astro';
+import TrustStrip from '../components/TrustStrip.astro';
+import CtaBand from '../components/CtaBand.astro';
+
+interface Props {
+  locale: Locale;
+  content: SiteContent;
+}
+
+const { locale, content } = Astro.props;
+const t = useTranslations(locale);
+const s = content.settings;
+const page = getPage(content, 'certification');
+const site = getSiteUrl(Astro.locals);
+
+const courses = publishedCourses(content).filter((c) => c.scheme !== 'IN-HOUSE').slice(0, 3);
+const faqs = publishedFaqs(content).filter((f) => f.group === 'certification');
+
+const trail = [
+  { name: t('nav.home'), path: localizedPath('home', locale) },
+  { name: t('nav.certification'), path: localizedPath('certification', locale) },
+];
+
+const jsonLd = graph([
+  organizationSchema(site, s, locale),
+  breadcrumbSchema(site, trail),
+  faqSchema(faqs, locale),
+]);
+
+/** Side-by-side comparison — the single most-asked question on this topic. */
+const COMPARISON = [
+  {
+    label: { id: 'Cakupan pengakuan', en: 'Recognition' },
+    irata: { id: 'Internasional, 60+ negara', en: 'International, 60+ countries' },
+    bnsp: { id: 'Nasional Indonesia', en: 'National, Indonesia' },
+  },
+  {
+    label: { id: 'Struktur', en: 'Structure' },
+    irata: { id: '3 level bertingkat', en: 'Three progressive levels' },
+    bnsp: { id: 'TKPK Tingkat 1 & 2', en: 'TKPK Levels 1 & 2' },
+  },
+  {
+    label: { id: 'Masa berlaku', en: 'Validity' },
+    irata: { id: '3 tahun', en: '3 years' },
+    bnsp: { id: '3 tahun', en: '3 years' },
+  },
+  {
+    label: { id: 'Syarat naik level', en: 'Progression requirement' },
+    irata: { id: '1.000 jam kerja + 12 bulan', en: '1,000 logged hours + 12 months' },
+    bnsp: { id: 'Pengalaman kerja terdokumentasi', en: 'Documented work experience' },
+  },
+  {
+    label: { id: 'Paling diminta oleh', en: 'Most often required by' },
+    irata: { id: 'Operator migas multinasional', en: 'Multinational oil & gas operators' },
+    bnsp: { id: 'Proyek pemerintah & kontraktor lokal', en: 'Government projects & local contractors' },
+  },
+  {
+    label: { id: 'Dasar hukum', en: 'Legal basis' },
+    irata: { id: 'Skema industri (IRATA ICOP)', en: 'Industry scheme (IRATA ICOP)' },
+    bnsp: { id: 'Permenaker No. 9 Tahun 2016', en: 'Manpower Regulation 9/2016' },
+  },
+] as const;
+---
+
+<SiteLayout
+  locale={locale}
+  routeKey="certification"
+  content={content}
+  title={pick(page.metaTitle, locale)}
+  description={pick(page.metaDescription, locale)}
+  jsonLd={jsonLd}
+  whatsappSubject={locale === 'id' ? 'sertifikasi akses tali' : 'rope access certification'}
+>
+  <PageHero
+    locale={locale}
+    eyebrow={pick(page.heroEyebrow, locale)}
+    title={pick(page.heroTitle, locale)}
+    subtitle={pick(page.heroSubtitle, locale)}
+    trail={trail}
+  />
+
+  <section class="py-16 lg:py-20">
+    <div class="container-rac">
+      <div class="prose-rac mx-auto max-w-3xl" set:html={sanitizeHtml(pick(page.body, locale))} />
+    </div>
+  </section>
+
+  <!-- Comparison table -->
+  <section class="bg-steel-50 py-16 lg:py-20">
+    <div class="container-rac">
+      <SectionHeading
+        eyebrow={locale === 'id' ? 'Perbandingan' : 'Comparison'}
+        title={locale === 'id' ? 'IRATA atau BNSP?' : 'IRATA or BNSP?'}
+        intro={locale === 'id'
+          ? 'Keduanya sah dan sering dipegang bersamaan. Tabel ini membantu Anda memutuskan mana yang dibutuhkan proyek Anda lebih dulu.'
+          : 'Both are legitimate and often held together. This table helps you decide which one your project needs first.'}
+        align="center"
+      />
+
+      <div class="reveal mt-10 overflow-x-auto">
+        <table class="w-full min-w-[38rem] border-collapse bg-white text-left text-sm">
+          <caption class="sr-only">
+            {locale === 'id'
+              ? 'Perbandingan skema sertifikasi IRATA dan BNSP'
+              : 'Comparison of the IRATA and BNSP certification schemes'}
+          </caption>
+          <thead>
+            <tr class="bg-navy-800 text-white">
+              <th scope="col" class="p-4 font-display text-[0.75rem] uppercase tracking-[0.12em]"></th>
+              <th scope="col" class="p-4 font-display text-[0.8125rem] uppercase tracking-[0.12em]">IRATA</th>
+              <th scope="col" class="p-4 font-display text-[0.8125rem] uppercase tracking-[0.12em]">BNSP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {COMPARISON.map((row) => (
+              <tr class="border-b border-steel-100 last:border-0">
+                <th scope="row" class="p-4 align-top text-[0.8125rem] font-semibold text-navy-800">
+                  {pick(row.label, locale)}
+                </th>
+                <td class="p-4 align-top text-steel-500">{pick(row.irata, locale)}</td>
+                <td class="p-4 align-top text-steel-500">{pick(row.bnsp, locale)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 lg:py-20">
+    <div class="container-rac">
+      <SectionHeading
+        eyebrow={locale === 'id' ? 'Jalur Sertifikasi' : 'Certification Pathways'}
+        title={locale === 'id' ? 'Program yang Mengantar Anda ke Sana' : 'The Programmes That Get You There'}
+      />
+      <div class="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {courses.map((course) => <CourseCard locale={locale} course={course} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-steel-50 py-16 lg:py-20">
+    <div class="container-rac">
+      <SectionHeading
+        eyebrow={locale === 'id' ? 'Diakui Oleh' : 'Recognised By'}
+        title={locale === 'id' ? 'Lembaga & Standar' : 'Bodies & Standards'}
+        align="center"
+      />
+      <div class="mt-10">
+        <TrustStrip locale={locale} items={content.accreditations} />
+      </div>
+    </div>
+  </section>
+
+  {faqs.length > 0 && (
+    <section class="py-16 lg:py-20">
+      <div class="container-rac">
+        <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
+          <div class="lg:col-span-5">
+            <SectionHeading eyebrow="FAQ" title={t('section.faqTitle')} />
+          </div>
+          <div class="lg:col-span-7">
+            <FaqAccordion locale={locale} faqs={faqs} />
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <CtaBand
+    locale={locale}
+    settings={s}
+    eyebrow={locale === 'id' ? 'Masih ragu?' : 'Still unsure?'}
+    title={locale === 'id'
+      ? 'Kirim Persyaratan Proyek Anda,\nKami Petakan Sertifikasinya.'
+      : 'Send Us Your Project Requirement,\nWe Will Map the Certification.'}
+    subject={locale === 'id' ? 'pemilihan skema sertifikasi' : 'choosing a certification scheme'}
+  />
+</SiteLayout>
