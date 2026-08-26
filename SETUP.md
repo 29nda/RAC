@@ -59,64 +59,62 @@ untuk dashboard.
 
 ---
 
-## 2. Buat layanan Cloudflare
+## 2. Layanan Cloudflare
 
-Masuk lebih dulu:
+D1 dan KV **sudah dibuat** dan ID-nya sudah tertulis di `wrangler.toml`:
 
-```bash
-npx wrangler login
-```
+| Layanan | Nama | Status |
+|---|---|---|
+| D1 | `rac-db` | dibuat di region APAC, migrasi sudah dijalankan |
+| KV | `rac-cache` | dibuat, dipakai untuk cache dan rate limit |
+| R2 | `rac-media` | **belum** — perlu diaktifkan lebih dulu (lihat 2c) |
 
-### 2a. D1 — basis data konten
+Anda tidak perlu mengulang langkah 2a dan 2b kecuali membangun ulang dari nol.
+
+### 2a. D1 — basis data konten (sudah ada)
 
 ```bash
 npx wrangler d1 create rac-db
 ```
 
-Perintah ini mencetak `database_id`. Salin ke `wrangler.toml`:
-
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "rac-db"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"   # ← tempel di sini
-migrations_dir = "migrations"
-```
+Perintah ini mencetak `database_id`; tempel ke `wrangler.toml` di bawah
+`[[d1_databases]]`.
 
 *Batas paket gratis: 5 GB penyimpanan, 5 juta baris dibaca per hari.*
 
-### 2b. KV — cache dan pembatas laju
+### 2b. KV — cache dan pembatas laju (sudah ada)
 
 ```bash
-npx wrangler kv namespace create RAC_CACHE
+npx wrangler kv namespace create rac-cache
 ```
 
 Salin `id` yang dicetak ke **kedua** blok `kv_namespaces` di `wrangler.toml`
-(`CACHE` dan `SESSION` menunjuk namespace yang sama):
-
-```toml
-[[kv_namespaces]]
-binding = "CACHE"
-id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"   # ← tempel di sini
-
-[[kv_namespaces]]
-binding = "SESSION"
-id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"   # ← dan di sini
-```
+(`CACHE` dan `SESSION` menunjuk namespace yang sama).
 
 *Batas paket gratis: 100.000 baca dan 1.000 tulis per hari.*
 
-### 2c. R2 — pustaka media
+### 2c. R2 — pustaka media (opsional, belum aktif)
 
-```bash
-npx wrangler r2 bucket create rac-media
-```
+> **R2 harus diaktifkan lewat Dashboard lebih dulu.** Berbeda dari D1 dan KV,
+> R2 tidak bisa dinyalakan lewat API atau CLI. Selama belum aktif, `wrangler`
+> akan menolak seluruh *deploy* bila binding-nya tidak dinonaktifkan — itulah
+> sebabnya blok `[[r2_buckets]]` di `wrangler.toml` sengaja dikomentari.
 
-Nama `rac-media` sudah tertulis di `wrangler.toml`, jadi tidak perlu diubah.
+Situs berjalan normal tanpa R2. Yang belum tersedia hanyalah unggah berkas di
+menu **Media**; halaman tersebut menampilkan pemberitahuan yang jelas, dan
+kolom gambar tetap menerima URL dari sumber lain.
+
+Untuk mengaktifkannya:
+
+1. Cloudflare Dashboard → **R2** → **Enable** (paket gratis, tanpa kartu).
+2. Buat bucket-nya:
+   ```bash
+   npx wrangler r2 bucket create rac-media
+   ```
+3. Hapus tanda `#` pada tiga baris `[[r2_buckets]]` di `wrangler.toml`.
+4. *Deploy* ulang: `npm run deploy`.
 
 *Batas paket gratis: 10 GB penyimpanan, tanpa biaya keluar (egress).*
-
----
 
 ## 3. Setel *secret* produksi
 
@@ -148,6 +146,10 @@ dan pembatasan laju.
 ---
 
 ## 4. Terapkan migrasi dan *deploy*
+
+Migrasi `0001_init.sql` **sudah dijalankan** pada `rac-db`, jadi perintah di
+bawah akan melaporkan "no migrations to apply". Tetap jalankan — perintah ini
+aman diulang dan menjadi kebiasaan yang benar untuk migrasi berikutnya.
 
 ```bash
 npx wrangler d1 migrations apply rac-db --remote
@@ -261,8 +263,16 @@ terpasang. Periksa dengan `npx wrangler secret list`.
 `database_id` di `wrangler.toml` masih berisi teks contoh, atau migrasi belum
 dijalankan. Jalankan `npx wrangler d1 migrations apply rac-db --remote`.
 
-**Unggahan media gagal**
-Bucket R2 belum dibuat. Jalankan `npx wrangler r2 bucket create rac-media`.
+**Unggahan media gagal / halaman Media bilang "Bucket R2 belum terhubung"**
+R2 belum diaktifkan untuk akun ini. Ikuti langkah 2c — aktifkan R2 lewat
+Dashboard, buat bucket-nya, lalu hapus komentar pada blok `[[r2_buckets]]`.
+
+**Deploy gagal dengan pesan soal binding atau UUID tidak valid**
+Salah satu binding di `wrangler.toml` menunjuk sumber daya yang tidak ada.
+Cocokkan `database_id`, `id` KV, dan `bucket_name` dengan apa yang benar-benar
+ada di akun Anda (`npx wrangler d1 list`, `npx wrangler kv namespace list`).
+Binding yang tidak dapat diselesaikan akan menggagalkan seluruh *deploy*, bukan
+hanya fitur yang memakainya.
 
 **Perubahan tidak muncul di situs**
 Tekan **Bersihkan Cache** pada halaman Ringkasan dashboard. Bila memakai

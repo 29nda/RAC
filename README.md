@@ -19,7 +19,7 @@ di atas paket gratis Cloudflare, dengan dashboard admin yang dibuat khusus.
 | **Styling** | Tailwind CSS v4 |
 | **Basis data** | Cloudflare D1 (SQLite) |
 | **Cache** | Cloudflare KV + cache tepi (edge) |
-| **Media** | Cloudflare R2 |
+| **Media** | Cloudflare R2 (opsional — lihat SETUP.md 2c) |
 | **Bahasa** | Indonesia (`/`) dan Inggris (`/en/`) |
 | **Dependensi runtime** | Tidak ada di luar Astro — tanpa React, tanpa CDN pihak ketiga |
 
