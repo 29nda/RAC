@@ -37,7 +37,7 @@ export const services: Service[] = [
     },
     deliverables: {
       id: [
-        'Laporan inspeksi bertanda tangan inspektor bersertifikat',
+        'Laporan inspeksi bertanda tangan inspektur bersertifikat',
         'Data mentah pengukuran dalam format yang dapat diaudit',
         'Rekomendasi tindakan perbaikan dengan skala prioritas',
         'Berkas foto-video terindeks per lokasi',
@@ -55,7 +55,7 @@ export const services: Service[] = [
       en: 'A rope access technician taking ultrasonic thickness readings on a tank wall',
     },
     body: {
-      id: '<h2>Mengapa akses tali untuk inspeksi</h2><p>Membangun perancah pada satu flare stack dapat memakan waktu dua minggu dan menghentikan sebagian operasi. Tim akses tali kami tiba pagi hari, memasang sistem dalam hitungan jam, dan menyerahkan data pada hari yang sama.</p><p>Perbedaannya bukan hanya kecepatan. Setiap jam perancah berdiri adalah jam paparan risiko tambahan bagi pekerja lain di sekitarnya.</p><h2>Kompetensi ganda, bukan dua tim</h2><p>Kami tidak menurunkan teknisi tali untuk menggendong inspektor. Personel kami memegang sertifikat IRATA sekaligus kualifikasi NDT Level II — orang yang menggantung di tali adalah orang yang membaca alat.</p>',
+      id: '<h2>Mengapa akses tali untuk inspeksi</h2><p>Membangun perancah pada satu flare stack dapat memakan waktu dua minggu dan menghentikan sebagian operasi. Tim akses tali kami tiba pagi hari, memasang sistem dalam hitungan jam, dan menyerahkan data pada hari yang sama.</p><p>Perbedaannya bukan hanya kecepatan. Setiap jam perancah berdiri adalah jam paparan risiko tambahan bagi pekerja lain di sekitarnya.</p><h2>Kompetensi ganda, bukan dua tim</h2><p>Kami tidak menurunkan teknisi tali untuk menggendong inspektur. Personel kami memegang sertifikat IRATA sekaligus kualifikasi NDT Level II — orang yang menggantung di tali adalah orang yang membaca alat.</p>',
       en: '<h2>Why rope access for inspection</h2><p>Scaffolding a single flare stack can take two weeks and shut down part of your operation. Our rope access team arrives in the morning, rigs in a matter of hours, and hands over data the same day.</p><p>Speed is not the only difference. Every hour scaffolding stands is another hour of exposure for everyone else working around it.</p><h2>Dual competence, not two teams</h2><p>We do not send rope technicians to carry an inspector. Our personnel hold IRATA certification alongside NDT Level II qualifications — the person hanging on the rope is the person reading the instrument.</p>',
     },
   },
@@ -287,7 +287,7 @@ export const services: Service[] = [
       en: 'An HSE consultant reviewing permanent anchor points on an industrial roof',
     },
     body: {
-      id: '<h2>Temuan sebelum insiden, bukan sesudah</h2><p>Audit yang baik terasa tidak nyaman. Kami tidak menyusun laporan untuk menyenangkan manajemen — kami menyusunnya agar tidak ada yang jatuh.</p><h2>Yang paling sering kami temukan</h2><p>Tiga temuan berulang di banyak fasilitas: titik tambat yang dipakai tanpa pernah dihitung bebannya, rencana penyelamatan yang menyalin template pihak lain, dan APD yang tercatat diperiksa tetapi tanpa bukti riwayat. Ketiganya dapat diperbaiki dengan cepat setelah teridentifikasi.</p>',
+      id: '<h2>Temuan sebelum insiden, bukan sesudah</h2><p>Audit yang baik terasa tidak nyaman. Kami tidak menyusun laporan untuk menyenangkan manajemen — kami menyusunnya agar tidak ada yang jatuh.</p><h2>Yang paling sering kami temukan</h2><p>Tiga temuan berulang di banyak fasilitas: titik tambat yang dipakai tanpa pernah dihitung bebannya, rencana penyelamatan yang menyalin templat pihak lain, dan APD yang tercatat diperiksa tetapi tanpa bukti riwayat. Ketiganya dapat diperbaiki dengan cepat setelah teridentifikasi.</p>',
       en: '<h2>Findings before the incident, not after</h2><p>A good audit is uncomfortable. We do not write reports to reassure management — we write them so that nobody falls.</p><h2>What we find most often</h2><p>Three findings recur across many facilities: anchor points in use that were never load-assessed, rescue plans copied from someone else’s template, and PPE recorded as inspected with no supporting history. All three are quick to correct once they are identified.</p>',
     },
   },

@@ -21,7 +21,7 @@ export const UI = {
   'nav.primary':       { id: 'Navigasi utama',     en: 'Primary navigation' },
 
   'cta.header':        { id: 'Hubungi Kami',       en: 'Get in Touch' },
-  'cta.whatsapp':      { id: 'Chat via WhatsApp',  en: 'Chat on WhatsApp' },
+  'cta.whatsapp':      { id: 'Hubungi via WhatsApp',  en: 'Chat on WhatsApp' },
   'cta.whatsappShort': { id: 'WhatsApp',           en: 'WhatsApp' },
   'cta.consult':       { id: 'Konsultasi Gratis',  en: 'Free Consultation' },
   'cta.quote':         { id: 'Minta Penawaran',    en: 'Request a Quote' },
@@ -68,11 +68,11 @@ export const UI = {
   'form.send':         { id: 'Kirim Pesan',        en: 'Send Message' },
   'form.sending':      { id: 'Mengirim…',          en: 'Sending…' },
   'form.success':      {
-    id: 'Terima kasih. Pesan Anda sudah kami terima dan akan dibalas pada hari kerja berikutnya. Untuk respons lebih cepat, silakan hubungi kami via WhatsApp.',
+    id: 'Terima kasih. Pesan Anda sudah kami terima dan akan dibalas pada hari kerja berikutnya. Untuk respons lebih cepat, silakan hubungi kami melalui WhatsApp.',
     en: 'Thank you. We have received your message and will reply within one business day. For a faster response, reach us on WhatsApp.',
   },
   'form.error':        {
-    id: 'Maaf, pesan gagal terkirim. Silakan coba lagi atau hubungi kami langsung via WhatsApp.',
+    id: 'Maaf, pesan gagal dikirim. Silakan coba lagi atau hubungi kami langsung melalui WhatsApp.',
     en: 'Sorry, your message could not be sent. Please try again or contact us directly on WhatsApp.',
   },
   'form.consent':      {
