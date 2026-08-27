@@ -17,7 +17,7 @@ export const team: TeamMember[] = [
     role: { id: 'Instruktur Senior & Koordinator Penyelamatan', en: 'Senior Instructor & Rescue Coordinator' },
     credentials: ['IRATA Level 3', 'Confined Space Rescue', 'BNSP TKPK 3', 'HSE Officer'],
     bio: {
-      id: 'Mantan anggota tim tanggap darurat kilang. Dimas menyusun dan menguji rencana penyelamatan untuk seluruh penugasan standby rescue RAC.',
+      id: 'Mantan anggota tim tanggap darurat kilang. Dimas menyusun dan menguji rencana penyelamatan untuk seluruh penugasan tim penyelamat siaga RAC.',
       en: 'A former refinery emergency response team member. Dimas writes and proves the rescue plans behind every RAC standby rescue deployment.',
     },
   },
