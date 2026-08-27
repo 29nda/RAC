@@ -45,14 +45,22 @@ export function getSiteUrl(locals: App.Locals, fallback = 'https://ropeaccesscen
  * way that could mask a real problem.
  */
 export function isCanonicalHost(requestUrl: URL, locals: App.Locals): boolean {
-  const host = requestUrl.hostname;
+  const host = requestUrl.hostname.toLowerCase();
   if (host === 'localhost' || host === '127.0.0.1') return true;
 
+  let canonical: string;
   try {
-    return host === new URL(getSiteUrl(locals)).hostname;
+    canonical = new URL(getSiteUrl(locals)).hostname.toLowerCase();
   } catch {
     return true;
   }
+
+  // The `www` variant of the canonical domain is a legitimate way in, and the
+  // canonical tag already consolidates it. Marking it noindex as well would
+  // pair a "do not index" with a "the real page is over there", which are
+  // conflicting signals — so only genuinely foreign hosts are excluded.
+  const bare = (value: string) => value.replace(/^www\./, '');
+  return bare(host) === bare(canonical);
 }
 
 /** `waitUntil` when the runtime provides it, otherwise a no-op. */
