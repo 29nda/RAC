@@ -16,7 +16,7 @@ export const faqs: Faq[] = [
       en: 'What is rope access, and when is it the right method?',
     },
     answer: {
-      id: 'Rope access adalah metode kerja di ketinggian menggunakan dua sistem tali independen — satu tali kerja dan satu tali cadangan — sehingga kegagalan pada satu sistem tidak menyebabkan jatuh. Metode ini dipilih ketika area kerja sulit dijangkau perancah atau gondola, ketika waktu pemasangan akses harus singkat, atau ketika pekerjaan berlangsung di area produksi yang tidak boleh terhenti. Statistik keselamatan IRATA International secara konsisten menunjukkan tingkat kecelakaan akses tali yang jauh lebih rendah dibanding metode akses ketinggian lainnya.',
+      id: 'Rope access adalah metode kerja di ketinggian menggunakan dua sistem tali independen — satu tali kerja dan satu tali cadangan — sehingga kegagalan pada satu sistem tidak menyebabkan jatuh. Metode ini dipilih ketika area kerja sulit dijangkau perancah atau gondola, ketika waktu pemasangan akses harus singkat, atau ketika pekerjaan berlangsung di area produksi yang tidak boleh terhenti. Statistik keselamatan IRATA International secara konsisten menunjukkan tingkat kecelakaan akses tali yang jauh lebih rendah dibandingkan dengan metode akses ketinggian lain.',
       en: 'Rope access is a method of working at height using two independent rope systems — a working line and a backup line — so that failure of one system does not result in a fall. It is chosen when the work area is difficult to reach with scaffolding or a gondola, when access must be established quickly, or when work takes place in a production area that cannot be shut down. IRATA International’s safety statistics consistently show a far lower incident rate for rope access than for other work-at-height methods.',
     },
   },
@@ -72,7 +72,7 @@ export const faqs: Faq[] = [
       en: 'How long is a certificate valid, and how do I renew it?',
     },
     answer: {
-      id: 'Sertifikat IRATA dan BNSP sama-sama berlaku tiga tahun. Untuk IRATA, Anda harus mengikuti asesmen ulang sebelum masa berlaku berakhir. Apabila sertifikat telah kedaluwarsa lebih dari enam bulan, Anda wajib mengulang dari level di bawahnya. Kami menyarankan mengikuti program refresher dua hingga empat hari sebelum asesmen ulang, terutama jika Anda tidak rutin bekerja di tali. RAC mengirimkan pengingat gratis kepada seluruh alumni 90 hari sebelum sertifikat berakhir.',
+      id: 'Sertifikat IRATA dan BNSP sama-sama berlaku tiga tahun. Untuk IRATA, Anda harus mengikuti asesmen ulang sebelum masa berlaku berakhir. Apabila sertifikat telah kedaluwarsa lebih dari enam bulan, Anda wajib mengulang dari level di bawahnya. Kami menyarankan mengikuti program penyegaran dua hingga empat hari sebelum asesmen ulang, terutama jika Anda tidak rutin bekerja di tali. RAC mengirimkan pengingat gratis kepada seluruh alumni 90 hari sebelum sertifikat berakhir.',
       en: 'IRATA and BNSP certificates are both valid for three years. For IRATA you must be reassessed before the expiry date. If a certificate has been expired for more than six months, you must requalify from the level below. We recommend a two- to four-day refresher before reassessment, particularly if you have not been working on rope regularly. RAC sends every alumnus a free reminder 90 days before expiry.',
     },
   },
@@ -114,7 +114,7 @@ export const faqs: Faq[] = [
       en: 'Which areas does RAC serve?',
     },
     answer: {
-      id: 'Kami melayani seluruh wilayah Indonesia, dengan konsentrasi pekerjaan di Jawa, Sumatera, Kalimantan, dan Sulawesi — termasuk lokasi lepas pantai dan pulau terpencil. Tim kami terbiasa dengan persyaratan mobilisasi offshore seperti BOSIET, sertifikat medis MIGAS, dan induksi keselamatan operator.',
+      id: 'Kami melayani seluruh wilayah Indonesia, dengan konsentrasi pekerjaan di Jawa, Sumatera, Kalimantan, dan Sulawesi — termasuk lokasi lepas pantai dan pulau terpencil. Tim kami terbiasa dengan persyaratan mobilisasi lepas pantai seperti BOSIET, sertifikat medis MIGAS, dan induksi keselamatan operator.',
       en: 'We work throughout Indonesia, with the greatest concentration of work in Java, Sumatra, Kalimantan, and Sulawesi — including offshore and remote island locations. Our teams are familiar with offshore mobilisation requirements such as BOSIET, MIGAS medical certificates, and operator safety inductions.',
     },
   },
@@ -156,7 +156,7 @@ export const faqs: Faq[] = [
       en: 'How does RAC maintain its safety record?',
     },
     answer: {
-      id: 'Setiap pekerjaan dimulai dengan penilaian risiko dan rencana penyelamatan tertulis yang ditandatangani supervisor Level 3. Seluruh APD diperiksa sebelum digunakan setiap hari dan diinspeksi terperinci setiap enam bulan dengan riwayat tercatat. Kami menerapkan kewenangan stop-work bagi setiap personel, tanpa memandang jabatan, dan setiap nyaris-celaka (near miss) dicatat serta ditinjau — karena pola yang tidak dicatat tidak dapat diperbaiki.',
+      id: 'Setiap pekerjaan dimulai dengan penilaian risiko dan rencana penyelamatan tertulis yang ditandatangani supervisor Level 3. Seluruh APD diperiksa sebelum digunakan setiap hari dan diinspeksi terperinci setiap enam bulan dengan riwayat tercatat. Kami menerapkan kewenangan menghentikan pekerjaan bagi setiap personel, tanpa memandang jabatan, dan setiap nyaris celaka (near miss) dicatat serta ditinjau — karena pola yang tidak dicatat tidak dapat diperbaiki.',
       en: 'Every job starts with a written risk assessment and rescue plan signed off by a Level 3 supervisor. All PPE is inspected before use each day and given a detailed six-monthly inspection with a recorded history. Every member of our personnel holds stop-work authority regardless of rank, and every near miss is logged and reviewed — because a pattern you do not record is a pattern you cannot fix.',
     },
   },
@@ -170,7 +170,7 @@ export const faqs: Faq[] = [
       en: 'How do booking and payment work?',
     },
     answer: {
-      id: 'Hubungi kami melalui WhatsApp, formulir kontak, atau telepon dengan menyebutkan kebutuhan Anda. Kami mengirim penawaran terperinci, umumnya pada hari kerja yang sama. Setelah penawaran disetujui, kursi pelatihan diamankan dengan uang muka, dan pelunasan dilakukan sebelum hari pertama. Untuk klien korporat, kami melayani pembayaran termin sesuai kontrak dan menerbitkan faktur pajak sesuai ketentuan yang berlaku.',
+      id: 'Hubungi kami melalui WhatsApp, formulir kontak, atau telepon dengan menyebutkan kebutuhan Anda. Kami mengirim penawaran terperinci, umumnya pada hari kerja yang sama. Setelah penawaran disetujui, kursi pelatihan dipesan dengan uang muka, dan pelunasan dilakukan sebelum hari pertama. Untuk klien korporat, kami melayani pembayaran termin sesuai kontrak dan menerbitkan faktur pajak sesuai ketentuan yang berlaku.',
       en: 'Contact us on WhatsApp, through the contact form, or by phone with your requirements. We send a detailed quotation, usually the same working day. Once the quotation is accepted, training seats are secured with a deposit and the balance is settled before day one. For corporate clients we accept staged payment under contract and issue tax invoices in line with prevailing regulations.',
     },
   },

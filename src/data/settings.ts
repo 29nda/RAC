@@ -36,8 +36,8 @@ export const settings: SiteSettings = {
   longitude: 106.8940,
 
   openingHours: {
-    id: 'Senin – Jumat, 08.00 – 17.00 WIB · Sabtu dengan perjanjian',
-    en: 'Monday – Friday, 08:00 – 17:00 WIB · Saturday by appointment',
+    id: 'Senin–Jumat, 08.00–17.00 WIB · Sabtu dengan perjanjian',
+    en: 'Monday–Friday, 08:00–17:00 WIB · Saturday by appointment',
   },
   mapEmbedQuery: 'Jl.+Industri+Raya+No.10,+Jakarta',
 

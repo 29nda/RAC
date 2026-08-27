@@ -53,7 +53,7 @@ export const courses: Course[] = [
       {
         title: { id: 'Hari 1 — Fondasi & Perangkat', en: 'Day 1 — Foundations & Equipment' },
         detail: {
-          id: 'Kerangka regulasi, IRATA ICOP, anatomi sistem dua tali, pengenalan dan pemeriksaan pra-pakai seluruh APD, simpul kerja dasar.',
+          id: 'Kerangka regulasi, IRATA ICOP, anatomi sistem dua tali, pengenalan dan pemeriksaan prapakai seluruh APD, simpul kerja dasar.',
           en: 'Regulatory framework, the IRATA ICOP, anatomy of a twin-rope system, familiarisation and pre-use inspection of all PPE, core working knots.',
         },
       },
@@ -81,7 +81,7 @@ export const courses: Course[] = [
       {
         title: { id: 'Hari 5 — Konsolidasi', en: 'Day 5 — Consolidation' },
         detail: {
-          id: 'Latihan terpadu berbasis skenario, review dokumentasi logbook, dan uji coba internal sebelum asesmen.',
+          id: 'Latihan terpadu berbasis skenario, peninjauan dokumentasi logbook, dan uji coba internal sebelum asesmen.',
           en: 'Integrated scenario practice, logbook documentation review, and an internal mock assessment.',
         },
       },
@@ -103,8 +103,8 @@ export const courses: Course[] = [
       en: 'IRATA Level 1 trainees practising rope manoeuvres on the RAC training tower',
     },
     body: {
-      id: '<h2>Untuk siapa kursus ini</h2><p>Level 1 ditujukan bagi teknisi yang belum pernah bekerja dengan sistem akses tali, atau bagi personel darat — welder, inspektor, teknisi mekanik, fotografer industri — yang perlu menjangkau area kerja yang tidak dapat dicapai perancah.</p><p>Setelah lulus, Anda dapat bekerja di bawah pengawasan langsung seorang IRATA Level 3 di lokasi kerja mana pun yang menerapkan skema IRATA.</p><h2>Cara kami mengajar</h2><p>Rasio instruktur terhadap peserta kami jaga maksimum 1 : 6, jauh di bawah batas IRATA. Artinya setiap manuver Anda diamati, dikoreksi, dan diulang sampai benar — bukan sekadar dicontohkan sekali di depan kelas.</p><p>Seluruh APD disediakan RAC dan diperiksa ulang setiap pagi. Peserta hanya perlu membawa sepatu keselamatan dan pakaian kerja.</p>',
-      en: '<h2>Who this course is for</h2><p>Level 1 is designed for technicians who have never worked on rope, and for ground-based specialists — welders, inspectors, mechanical fitters, industrial photographers — who need to reach work areas that scaffolding cannot serve.</p><p>On passing, you may work under the direct supervision of an IRATA Level 3 on any site operating to the IRATA scheme.</p><h2>How we teach</h2><p>We hold our instructor-to-trainee ratio at a maximum of 1 : 6, well below the IRATA ceiling. Every manoeuvre you make is watched, corrected, and repeated until it is right — not demonstrated once at the front of the room.</p><p>All PPE is supplied by RAC and re-inspected each morning. Trainees need only bring safety boots and work clothing.</p>',
+      id: '<h2>Untuk siapa kursus ini</h2><p>Level 1 ditujukan bagi teknisi yang belum pernah bekerja dengan sistem akses tali, atau bagi personel darat — welder, inspektur, teknisi mekanik, fotografer industri — yang perlu menjangkau area kerja yang tidak dapat dicapai perancah.</p><p>Setelah lulus, Anda dapat bekerja di bawah pengawasan langsung seorang IRATA Level 3 di lokasi kerja mana pun yang menerapkan skema IRATA.</p><h2>Cara kami mengajar</h2><p>Rasio instruktur terhadap peserta kami jaga maksimum 1:6, jauh di bawah batas IRATA. Artinya setiap manuver Anda diamati, dikoreksi, dan diulang sampai benar — bukan sekadar dicontohkan sekali di depan kelas.</p><p>Seluruh APD disediakan RAC dan diperiksa ulang setiap pagi. Peserta hanya perlu membawa sepatu keselamatan dan pakaian kerja.</p>',
+      en: '<h2>Who this course is for</h2><p>Level 1 is designed for technicians who have never worked on rope, and for ground-based specialists — welders, inspectors, mechanical fitters, industrial photographers — who need to reach work areas that scaffolding cannot serve.</p><p>On passing, you may work under the direct supervision of an IRATA Level 3 on any site operating to the IRATA scheme.</p><h2>How we teach</h2><p>We hold our instructor-to-trainee ratio at a maximum of 1:6, well below the IRATA ceiling. Every manoeuvre you make is watched, corrected, and repeated until it is right — not demonstrated once at the front of the room.</p><p>All PPE is supplied by RAC and re-inspected each morning. Trainees need only bring safety boots and work clothing.</p>',
     },
   },
   {
@@ -155,7 +155,7 @@ export const courses: Course[] = [
     },
     syllabus: [
       {
-        title: { id: 'Hari 1 — Review & Teori Rigging', en: 'Day 1 — Review & Rigging Theory' },
+        title: { id: 'Hari 1 — Peninjauan & Teori Rigging', en: 'Day 1 — Review & Rigging Theory' },
         detail: {
           id: 'Penyegaran manuver Level 1, teori pembebanan, sudut tambat, faktor keamanan, dan pemilihan titik tambat struktural.',
           en: 'Level 1 manoeuvre refresh, load theory, anchor angles, safety factors, and selecting structural anchor points.',
@@ -307,7 +307,7 @@ export const courses: Course[] = [
     },
     image: '/brand/logo-onLight-720.webp',
     imageAlt: {
-      id: 'Supervisor akses tali memimpin briefing keselamatan sebelum pekerjaan dimulai',
+      id: 'Supervisor akses tali memimpin pengarahan keselamatan sebelum pekerjaan dimulai',
       en: 'A rope access supervisor leading a safety briefing before work begins',
     },
     body: {
@@ -423,7 +423,7 @@ export const courses: Course[] = [
       id: 'Sertifikat mendekati masa berakhir, atau sudah lama tidak menyentuh tali? Program singkat untuk mengembalikan ketajaman sebelum asesmen ulang.',
       en: 'Certificate nearing expiry, or been off the ropes for a while? A short programme to sharpen you up before reassessment.',
     },
-    duration: { id: '2 – 4 hari, menyesuaikan level', en: '2 – 4 days, depending on level' },
+    duration: { id: '2–4 hari, disesuaikan dengan level', en: '2–4 days, depending on level' },
     price: { id: 'Hubungi kami untuk penawaran', en: 'Contact us for pricing' },
     prerequisites: {
       id: [
@@ -453,7 +453,7 @@ export const courses: Course[] = [
       {
         title: { id: 'Sesi 1 — Diagnostik', en: 'Session 1 — Diagnostic' },
         detail: {
-          id: 'Instruktur mengamati seluruh manuver Anda dan menyusun daftar perbaikan yang dipersonalisasi.',
+          id: 'Instruktur mengamati seluruh manuver Anda dan menyusun daftar perbaikan khusus untuk Anda.',
           en: 'An instructor observes your full manoeuvre set and builds a personalised correction list.',
         },
       },
@@ -502,7 +502,7 @@ export const courses: Course[] = [
       id: 'Kami membawa menara latih, instruktur, dan seluruh APD ke fasilitas Anda — silabus disusun mengikuti risiko nyata di lokasi kerja Anda.',
       en: 'We bring the training structure, instructors, and all PPE to your facility — with a syllabus built around the real hazards on your site.',
     },
-    duration: { id: 'Fleksibel, 1 – 10 hari', en: 'Flexible, 1 – 10 days' },
+    duration: { id: 'Fleksibel, 1–10 hari', en: 'Flexible, 1–10 days' },
     price: { id: 'Penawaran khusus per program', en: 'Quoted per programme' },
     prerequisites: {
       id: [
@@ -570,7 +570,7 @@ export const courses: Course[] = [
       en: 'A RAC instructor training a company team at the client’s own facility',
     },
     body: {
-      id: '<h2>Pelatihan yang tidak generik</h2><p>Pelatihan kelas terbuka mengajarkan prinsip. Pelatihan in-house mengajarkan prinsip itu pada struktur yang benar-benar dipanjat tim Anda setiap hari — di menara pendingin Anda, di tangki Anda, di jetty Anda.</p><h2>Nilai tambah bagi HSE</h2><p>Setiap program in-house menghasilkan rencana penyelamatan spesifik lokasi yang sudah diuji, bukan dokumen template. Dokumen ini kerap menjadi bukti kuat saat audit klien maupun inspeksi Disnaker.</p>',
+      id: '<h2>Pelatihan yang tidak generik</h2><p>Pelatihan kelas terbuka mengajarkan prinsip. Pelatihan in-house mengajarkan prinsip itu pada struktur yang benar-benar dipanjat tim Anda setiap hari — di menara pendingin Anda, di tangki Anda, di dermaga Anda.</p><h2>Nilai tambah bagi HSE</h2><p>Setiap program in-house menghasilkan rencana penyelamatan spesifik lokasi yang sudah diuji, bukan dokumen templat. Dokumen ini kerap menjadi bukti kuat saat audit klien maupun inspeksi Disnaker.</p>',
       en: '<h2>Training that is not generic</h2><p>An open course teaches principles. In-house training teaches those principles on the structures your team actually climbs every day — your cooling tower, your tanks, your jetty.</p><h2>What HSE gets out of it</h2><p>Every in-house programme produces a tested, site-specific rescue plan rather than a template document. That evidence carries real weight in client audits and Ministry of Manpower inspections.</p>',
     },
   },
