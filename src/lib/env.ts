@@ -31,6 +31,38 @@ export function getSiteUrl(locals: App.Locals, fallback = 'https://ropeaccesscen
   return raw.replace(/\/+$/, '');
 }
 
+/**
+ * Whether this request arrived on the hostname the site canonicalises to.
+ *
+ * A Worker is always reachable on its `*.workers.dev` subdomain as well as on
+ * any custom domain, so the same pages are served from two hostnames. Every
+ * canonical tag, hreflang pair, sitemap entry and Open Graph URL is built from
+ * PUBLIC_SITE_URL, which means the non-canonical host serves pages that point
+ * somewhere else — the classic duplicate-content trap. Callers use this to
+ * keep the non-canonical host out of search indexes entirely.
+ *
+ * Localhost counts as canonical so development is never marked noindex in a
+ * way that could mask a real problem.
+ */
+export function isCanonicalHost(requestUrl: URL, locals: App.Locals): boolean {
+  const host = requestUrl.hostname.toLowerCase();
+  if (host === 'localhost' || host === '127.0.0.1') return true;
+
+  let canonical: string;
+  try {
+    canonical = new URL(getSiteUrl(locals)).hostname.toLowerCase();
+  } catch {
+    return true;
+  }
+
+  // The `www` variant of the canonical domain is a legitimate way in, and the
+  // canonical tag already consolidates it. Marking it noindex as well would
+  // pair a "do not index" with a "the real page is over there", which are
+  // conflicting signals — so only genuinely foreign hosts are excluded.
+  const bare = (value: string) => value.replace(/^www\./, '');
+  return bare(host) === bare(canonical);
+}
+
 /** `waitUntil` when the runtime provides it, otherwise a no-op. */
 export function deferred(locals: App.Locals, promise: Promise<unknown>): void {
   const ctx = (locals as { runtime?: { ctx?: { waitUntil?: (p: Promise<unknown>) => void } } })

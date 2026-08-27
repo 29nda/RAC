@@ -118,15 +118,38 @@ Untuk mengaktifkannya:
 
 ## 3. Setel *secret* produksi
 
-*Secret* tidak pernah masuk ke repositori. Setel satu per satu:
+Satu perintah mengurus ketiganya — membuat sandi, menurunkan hash-nya,
+membuat kunci penanda sesi, lalu mengunggah semuanya ke Cloudflare:
 
 ```bash
-npx wrangler secret put ADMIN_EMAIL
-npx wrangler secret put ADMIN_PASSWORD_HASH
-npx wrangler secret put SESSION_SECRET
+npx wrangler login      # sekali saja
+npm run admin:setup
 ```
 
-Gunakan `SESSION_SECRET` yang **berbeda** dari nilai pengembangan lokal.
+Sandinya dicetak sekali di akhir. **Simpan ke pengelola kata sandi Anda sebelum
+menutup terminal** — sandi itu tidak ditulis ke berkas mana pun dan tidak dapat
+ditampilkan ulang.
+
+Ingin menentukan sandi sendiri, atau memakai e-mail lain:
+
+```bash
+npm run admin:setup -- "sandi-pilihan-anda"
+ADMIN_EMAIL="anda@perusahaan.com" npm run admin:setup
+```
+
+Untuk mengganti sandi di kemudian hari, jalankan perintah yang sama lagi.
+
+<details>
+<summary>Cara manual, bila lebih suka satu per satu</summary>
+
+```bash
+npm run admin:hash -- "sandi-anda"       # salin barisnya
+npx wrangler secret put ADMIN_EMAIL
+npx wrangler secret put ADMIN_PASSWORD_HASH
+npx wrangler secret put SESSION_SECRET    # openssl rand -hex 32
+```
+
+</details>
 
 ### Opsional — Cloudflare Turnstile (anti-spam formulir)
 
@@ -277,8 +300,15 @@ kembali ke versi yang tersimpan di repositori.
 ## Pemecahan masalah
 
 **Dashboard menolak masuk dengan "dashboard not configured"**
-Ketiga *secret* (`ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `SESSION_SECRET`) harus
-terpasang. Periksa dengan `npx wrangler secret list`.
+Ketiga *secret* belum terpasang. Jalankan `npm run admin:setup`, atau periksa
+apa yang sudah ada dengan `npx wrangler secret list`.
+
+**Situs tayang di dua alamat (workers.dev dan domain sendiri)**
+Itu memang bawaan Workers. Alamat `workers.dev` otomatis dikirimi header
+`X-Robots-Tag: noindex` dan `robots.txt` berisi `Disallow: /`, sehingga tidak
+akan terindeks dan tidak menjadi konten duplikat. Pengunjung tetap dapat
+membukanya seperti biasa. Bila kelak ingin menutup alamat itu sepenuhnya,
+setel `workers_dev = false` di `wrangler.toml`.
 
 **Menyimpan gagal dengan "no database is bound"**
 `database_id` di `wrangler.toml` masih berisi teks contoh, atau migrasi belum

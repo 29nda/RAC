@@ -1,5 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
-import { getEnv } from './lib/env';
+import { getEnv, isCanonicalHost } from './lib/env';
 import { readSession, isAuthConfigured } from './lib/auth';
 import { randomHex } from './lib/security';
 
@@ -109,6 +109,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
     headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   } else if (contentType.includes('text/html')) {
+    // The workers.dev subdomain serves the same pages as the custom domain,
+    // but every canonical tag on them points at the custom domain. Letting a
+    // crawler index this host would create duplicate content pointing at a
+    // hostname it was not served from, so keep it out of the index entirely.
+    if (!isCanonicalHost(url, locals as App.Locals)) {
+      headers.set('X-Robots-Tag', 'noindex, nofollow');
+    }
+
     // Served from the edge immediately, revalidated in the background, so a
     // content change from the dashboard propagates within a minute without
     // ever making a visitor wait on an origin render.

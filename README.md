@@ -128,7 +128,8 @@ satu baris di sana, satu `view`, dan satu cabang di `src/pages/[...path].astro`.
 | `npm run deploy` | Build lalu `wrangler deploy` (deploy manual; `main` sudah otomatis) |
 | `npm run db:migrate:local` | Migrasi D1 lokal |
 | `npm run db:migrate:remote` | Migrasi D1 produksi |
-| `npm run admin:hash -- "sandi"` | Membuat `ADMIN_PASSWORD_HASH` |
+| `npm run admin:setup` | Membuat & mengunggah seluruh kredensial dashboard |
+| `npm run admin:hash -- "sandi"` | Membuat `ADMIN_PASSWORD_HASH` saja |
 
 ---
 
@@ -149,6 +150,9 @@ satu baris di sana, satu `view`, dan satu cabang di `src/pages/[...path].astro`.
 - **Formulir publik** dilindungi *honeypot*, token bertanda tangan berbasis jam,
   pembatasan laju, dan Turnstile (opsional).
 - **Jejak audit** mencatat setiap tindakan dashboard di tabel `audit_log`.
+- **Host non-kanonik** (`*.workers.dev`) menerima `X-Robots-Tag: noindex` dan
+  `robots.txt` berisi `Disallow: /`, sehingga alamat pratinjau tidak pernah
+  bersaing dengan domain asli di mesin pencari.
 
 Seluruh primitif kriptografi memakai WebCrypto — tanpa dependensi tambahan,
 berjalan apa adanya di Workers.
