@@ -49,7 +49,7 @@ const wa = whatsappUrl(s, locale, { subject: title, sourceUrl: Astro.url.href })
 const STATUS_TONE: Record<string, string> = {
   open: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   limited: 'bg-amber-50 text-amber-700 border-amber-200',
-  full: 'bg-steel-100 text-steel-400 border-steel-200',
+  full: 'bg-surface-alt text-muted border-line',
   request: 'bg-navy-50 text-navy-700 border-navy-200',
 };
 ---
@@ -89,35 +89,35 @@ const STATUS_TONE: Record<string, string> = {
       <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
         <!-- Main column -->
         <div class="lg:col-span-8">
-          <h2 class="text-xl text-navy-800 lg:text-2xl">
+          <h2 class="text-xl text-ink lg:text-2xl">
             {locale === 'id' ? 'Yang Akan Anda Kuasai' : 'What You Will Master'}
           </h2>
           <div class="rule-accent mt-4"></div>
           <ul class="mt-6 space-y-3">
             {course.outcomes[locale].map((outcome) => (
-              <li class="flex gap-3 text-[0.9375rem] leading-relaxed text-steel-500">
-                <Icon name="check" size={18} class="mt-0.5 flex-none text-brand-600" />
+              <li class="flex gap-3 text-[0.9375rem] leading-relaxed text-muted">
+                <Icon name="check" size={18} class="mt-0.5 flex-none text-brand-ink" />
                 <span>{outcome}</span>
               </li>
             ))}
           </ul>
 
-          <h2 class="mt-14 text-xl text-navy-800 lg:text-2xl">
+          <h2 class="mt-14 text-xl text-ink lg:text-2xl">
             {locale === 'id' ? 'Silabus' : 'Syllabus'}
           </h2>
           <div class="rule-accent mt-4"></div>
-          <ol class="mt-6 space-y-0 border-l-2 border-steel-100">
+          <ol class="mt-6 space-y-0 border-l-2 border-line">
             {course.syllabus.map((item, index) => (
               <li class="relative pb-7 pl-7 last:pb-0">
                 <span
-                  class="absolute -left-[0.5625rem] top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-brand-600 bg-white"
+                  class="absolute -left-[0.5625rem] top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-brand-600 bg-card"
                   aria-hidden="true"
                 ></span>
-                <h3 class="text-[0.9375rem] text-navy-800">
-                  <span class="mr-2 font-display text-brand-600">{String(index + 1).padStart(2, '0')}</span>
+                <h3 class="text-[0.9375rem] text-ink">
+                  <span class="mr-2 font-display text-brand-ink">{String(index + 1).padStart(2, '0')}</span>
                   {pick(item.title, locale)}
                 </h3>
-                <p class="mt-2 text-[0.9375rem] leading-relaxed text-steel-400">
+                <p class="mt-2 text-[0.9375rem] leading-relaxed text-muted">
                   {pick(item.detail, locale)}
                 </p>
               </li>
@@ -133,7 +133,7 @@ const STATUS_TONE: Record<string, string> = {
         <aside class="lg:col-span-4">
           <div class="sticky top-[calc(var(--header-h)+1.5rem)] space-y-5">
             <div class="card p-6">
-              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-ink">
                 {locale === 'id' ? 'Ringkasan Program' : 'Programme Summary'}
               </h2>
               <dl class="mt-5 space-y-4 text-sm">
@@ -143,11 +143,11 @@ const STATUS_TONE: Record<string, string> = {
                   { icon: 'certificate', label: t('label.certificate'), value: pick(course.certificate, locale) },
                   { icon: 'briefcase', label: t('label.price'), value: pick(course.price, locale) },
                 ].map((row) => (
-                  <div class="flex gap-3 border-b border-steel-100 pb-4 last:border-0 last:pb-0">
-                    <Icon name={row.icon as 'clock'} size={17} class="mt-0.5 flex-none text-brand-600" />
+                  <div class="flex gap-3 border-b border-line pb-4 last:border-0 last:pb-0">
+                    <Icon name={row.icon as 'clock'} size={17} class="mt-0.5 flex-none text-brand-ink" />
                     <div>
-                      <dt class="text-[0.6875rem] uppercase tracking-[0.1em] text-steel-300">{row.label}</dt>
-                      <dd class="mt-1 leading-relaxed text-navy-800">{row.value}</dd>
+                      <dt class="text-[0.6875rem] uppercase tracking-[0.1em] text-soft">{row.label}</dt>
+                      <dd class="mt-1 leading-relaxed text-ink">{row.value}</dd>
                     </div>
                   </div>
                 ))}
@@ -163,13 +163,13 @@ const STATUS_TONE: Record<string, string> = {
             </div>
 
             <div class="card p-6">
-              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-ink">
                 {t('label.prereq')}
               </h2>
               <ul class="mt-4 space-y-2.5">
                 {course.prerequisites[locale].map((item) => (
-                  <li class="flex gap-2.5 text-[0.8125rem] leading-relaxed text-steel-400">
-                    <Icon name="check-circle" size={15} class="mt-0.5 flex-none text-steel-300" />
+                  <li class="flex gap-2.5 text-[0.8125rem] leading-relaxed text-muted">
+                    <Icon name="check-circle" size={15} class="mt-0.5 flex-none text-soft" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -178,17 +178,17 @@ const STATUS_TONE: Record<string, string> = {
 
             {sessions.length > 0 && (
               <div class="card p-6">
-                <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+                <h2 class="font-display text-sm uppercase tracking-[0.14em] text-ink">
                   {locale === 'id' ? 'Jadwal Terdekat' : 'Next Dates'}
                 </h2>
                 <ul class="mt-4 space-y-3">
                   {sessions.slice(0, 4).map((session) => (
-                    <li class="flex items-center justify-between gap-3 border-b border-steel-100 pb-3 last:border-0 last:pb-0">
+                    <li class="flex items-center justify-between gap-3 border-b border-line pb-3 last:border-0 last:pb-0">
                       <div>
-                        <p class="text-[0.8125rem] font-semibold text-navy-800">
+                        <p class="text-[0.8125rem] font-semibold text-ink">
                           {formatDateShort(session.startDate, locale)}
                         </p>
-                        <p class="text-[0.75rem] text-steel-300">{pick(session.location, locale)}</p>
+                        <p class="text-[0.75rem] text-soft">{pick(session.location, locale)}</p>
                       </div>
                       <span class:list={[
                         'flex-none border px-2 py-0.5 text-[0.625rem] font-semibold uppercase tracking-wide',
@@ -206,7 +206,7 @@ const STATUS_TONE: Record<string, string> = {
   </section>
 
   {related.length > 0 && (
-    <section class="bg-steel-50 py-16 lg:py-20">
+    <section class="bg-surface-alt py-16 lg:py-20">
       <div class="container-rac">
         <SectionHeading
           eyebrow={locale === 'id' ? 'Program Lain' : 'Other Programmes'}

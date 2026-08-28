@@ -105,9 +105,9 @@ const shareLinks = [
           <div class="prose-rac mt-10" set:html={sanitizeHtml(pick(post.body, locale))} />
 
           {post.tags.length > 0 && (
-            <ul class="mt-12 flex flex-wrap gap-2 border-t border-steel-100 pt-8">
+            <ul class="mt-12 flex flex-wrap gap-2 border-t border-line pt-8">
               {post.tags.map((tag) => (
-                <li class="border border-steel-100 bg-steel-50 px-2.5 py-1 text-[0.75rem] text-steel-400">
+                <li class="border border-line bg-surface-alt px-2.5 py-1 text-[0.75rem] text-muted">
                   #{tag}
                 </li>
               ))}
@@ -118,7 +118,7 @@ const shareLinks = [
         <aside class="lg:col-span-4">
           <div class="sticky top-[calc(var(--header-h)+1.5rem)] space-y-5">
             <div class="card p-6">
-              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+              <h2 class="font-display text-sm uppercase tracking-[0.14em] text-ink">
                 {t('label.share')}
               </h2>
               <ul class="mt-4 flex gap-2.5">
@@ -128,7 +128,7 @@ const shareLinks = [
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="inline-flex h-11 w-11 items-center justify-center border border-steel-100 text-steel-400 transition-colors hover:border-brand-600 hover:bg-brand-600 hover:text-white"
+                      class="inline-flex h-11 w-11 items-center justify-center border border-line text-muted transition-colors hover:border-brand-600 hover:bg-brand-600 hover:text-white"
                       aria-label={`${t('label.share')} — ${link.label}`}
                     >
                       <Icon name={link.icon} size={18} filled={link.icon === 'whatsapp'} />
@@ -138,8 +138,8 @@ const shareLinks = [
               </ul>
             </div>
 
-            <div class="bg-navy-800 p-6 text-white">
-              <Icon name="graduation-cap" size={26} class="text-brand-500" />
+            <div class="on-navy bg-navy-800 p-6 text-white">
+              <Icon name="graduation-cap" size={26} class="text-brand-ink" />
               <h2 class="mt-4 text-base">
                 {locale === 'id' ? 'Ingin Bersertifikat?' : 'Want to Get Certified?'}
               </h2>
@@ -160,7 +160,7 @@ const shareLinks = [
   </section>
 
   {related.length > 0 && (
-    <section class="bg-steel-50 py-16 lg:py-20">
+    <section class="bg-surface-alt py-16 lg:py-20">
       <div class="container-rac">
         <SectionHeading
           eyebrow={locale === 'id' ? 'Bacaan Lain' : 'Further Reading'}

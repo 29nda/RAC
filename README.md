@@ -133,6 +133,27 @@ satu baris di sana, satu `view`, dan satu cabang di `src/pages/[...path].astro`.
 
 ---
 
+## Tema terang & gelap
+
+Pembaca dapat berganti tema lewat tombol di header; pilihannya tersimpan di
+`localStorage`. Selama belum memilih, situs mengikuti setelan sistem lewat
+`prefers-color-scheme`. Sebuah skrip kecil di `<head>` menerapkan pilihan
+sebelum cat pertama, sehingga halaman tidak berkedip.
+
+Komponen tidak memakai warna harfiah, melainkan token semantik
+(`surface`, `surface-alt`, `card`, `ink`, `muted`, `soft`, `line`) yang
+nilainya ditukar oleh `[data-theme='dark']`. Menambah tema baru cukup dengan
+mendefinisikan ulang token tersebut.
+
+Merah merek `#E30613` hanya mencapai rasio kontras 3,56:1 di atas navy — lolos
+ambang teks besar, tetapi terasa gelap. Karena itu ada `--color-brand-lift`
+(`#FA3844`): rona dan saturasi persis sama (356°, 95%) namun mencapai 4,73:1.
+Warna ini dipakai untuk **teks dan ikon** melalui `--brand-ink`, sedangkan
+isian tombol tetap memakai merah aslinya — teks putih di atas merah yang
+ditinggikan justru kehilangan kontras.
+
+Dashboard sengaja dikunci ke tema terang (`data-theme="light"`).
+
 ## Keamanan
 
 - **Content-Security-Policy** dengan *nonce* per permintaan. Tidak ada

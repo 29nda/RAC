@@ -16,21 +16,21 @@ const href = localizedPath('blog', locale, post.slug);
 ---
 
 <article class="card card-hover reveal relative flex h-full flex-col p-6">
-  <div class="flex items-center gap-3 text-[0.75rem] text-steel-300">
-    <span class="font-display font-bold uppercase tracking-[0.12em] text-brand-600">
+  <div class="flex items-center gap-3 text-[0.75rem] text-soft">
+    <span class="font-display font-bold uppercase tracking-[0.12em] text-brand-ink">
       {pick(post.category, locale)}
     </span>
     <span aria-hidden="true">·</span>
     <time datetime={post.publishedAt}>{formatDateShort(post.publishedAt, locale)}</time>
   </div>
 
-  <h3 class="mt-3.5 text-lg leading-snug text-navy-800">
+  <h3 class="mt-3.5 text-lg leading-snug text-ink">
     <a href={href} class="after:absolute after:inset-0">{pick(post.title, locale)}</a>
   </h3>
 
-  <p class="mt-3 flex-1 text-sm leading-relaxed text-steel-400">{pick(post.excerpt, locale)}</p>
+  <p class="mt-3 flex-1 text-sm leading-relaxed text-muted">{pick(post.excerpt, locale)}</p>
 
-  <div class="mt-6 flex items-center justify-between gap-3 text-[0.75rem] text-steel-300">
+  <div class="mt-6 flex items-center justify-between gap-3 text-[0.75rem] text-soft">
     <span>{post.author}</span>
     <span class="flex items-center gap-1.5">
       <Icon name="clock" size={13} />

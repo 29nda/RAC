@@ -88,7 +88,25 @@ const metaDescription = description.length > 158
     <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImage} />
 
-    <meta name="theme-color" content="#0d1b2a" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#080d14" media="(prefers-color-scheme: dark)" />
+
+    <script nonce={nonce} is:inline>
+      // Applies the stored theme before the first paint. Without this the page
+      // renders in the default theme and then flips, which is far more jarring
+      // than the theme being briefly wrong. Nothing is written when no choice
+      // has been stored, so the CSS media query keeps following the system.
+      (function () {
+        try {
+          var stored = window.localStorage.getItem('rac-theme');
+          if (stored === 'dark' || stored === 'light') {
+            document.documentElement.setAttribute('data-theme', stored);
+          }
+        } catch (error) {
+          // Storage can be blocked; the system preference still applies.
+        }
+      })();
+    </script>
     <meta name="format-detection" content="telephone=no" />
     <meta name="author" content={settings.legalName} />
     <meta name="geo.region" content="ID-JK" />

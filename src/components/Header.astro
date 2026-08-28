@@ -6,6 +6,7 @@ import type { Course, Service, SiteSettings } from '../lib/types';
 import { whatsappUrl } from '../lib/whatsapp';
 import Icon from './Icon.astro';
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import ThemeToggle from './ThemeToggle.astro';
 
 interface Props {
   locale: Locale;
@@ -105,18 +106,18 @@ const isActive = (key: RouteKey) => key === routeKey;
               {isActive(item.key) && <span class="absolute inset-x-2.5 bottom-1 h-0.5 bg-brand-600"></span>}
 
               <div
-                class="invisible absolute left-0 top-full w-[19rem] translate-y-1 border border-navy-100 bg-white opacity-0 shadow-2xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
+                class="invisible absolute left-0 top-full w-[19rem] translate-y-1 border border-navy-100 bg-card opacity-0 shadow-2xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100"
               >
                 <ul class="py-2">
                   {item.children.map((child) => (
                     <li>
                       <a
                         href={child.href}
-                        class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-steel-500 transition-colors hover:bg-steel-50 hover:text-navy-800"
+                        class="flex items-center justify-between gap-3 px-4 py-2.5 text-sm text-muted transition-colors hover:bg-surface-alt hover:text-ink"
                       >
                         <span>{child.label}</span>
                         {child.note && (
-                          <span class="flex-none font-display text-[0.625rem] font-bold uppercase tracking-wider text-brand-600">
+                          <span class="flex-none font-display text-[0.625rem] font-bold uppercase tracking-wider text-brand-ink">
                             {child.note}
                           </span>
                         )}
@@ -143,6 +144,7 @@ const isActive = (key: RouteKey) => key === routeKey;
       </nav>
 
       <div class="flex items-center gap-3">
+        <ThemeToggle locale={locale} class="hidden h-9 w-9 sm:inline-flex" />
         <LanguageSwitcher locale={locale} routeKey={routeKey} slug={slug} class="hidden sm:inline-flex" />
 
         <a href={wa} class="btn btn-primary btn-sm hidden lg:inline-flex" rel="noopener" target="_blank">
@@ -178,7 +180,7 @@ const isActive = (key: RouteKey) => key === routeKey;
                 href={localizedPath(item.key, locale)}
                 class:list={[
                   'flex-1 py-3 font-display text-base font-bold uppercase tracking-[0.06em]',
-                  isActive(item.key) ? 'text-brand-500' : 'text-white',
+                  isActive(item.key) ? 'text-brand-ink' : 'text-white',
                 ]}
                 aria-current={isActive(item.key) ? 'page' : undefined}
               >
@@ -215,7 +217,10 @@ const isActive = (key: RouteKey) => key === routeKey;
           <Icon name="whatsapp" size={18} filled />
           {t('cta.whatsapp')}
         </a>
-        <LanguageSwitcher locale={locale} routeKey={routeKey} slug={slug} class="w-full justify-center" />
+        <div class="flex items-center gap-3">
+          <LanguageSwitcher locale={locale} routeKey={routeKey} slug={slug} class="flex-1 justify-center" />
+          <ThemeToggle locale={locale} class="inline-flex h-11 w-11 flex-none" />
+        </div>
       </div>
     </nav>
   </div>

@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import tailwindcss from '@tailwindcss/vite';
 
-const SITE = process.env.PUBLIC_SITE_URL || 'https://ropeaccesscenter.com';
+const SITE = process.env.PUBLIC_SITE_URL || 'https://ropeaccesscenter.id';
 
 export default defineConfig({
   site: SITE,

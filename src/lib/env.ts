@@ -26,7 +26,7 @@ export function getMedia(locals: App.Locals): R2Bucket | undefined {
 }
 
 /** Absolute site origin, without a trailing slash. */
-export function getSiteUrl(locals: App.Locals, fallback = 'https://ropeaccesscenter.com'): string {
+export function getSiteUrl(locals: App.Locals, fallback = 'https://ropeaccesscenter.id'): string {
   const raw = getEnv(locals).PUBLIC_SITE_URL || fallback;
   return raw.replace(/\/+$/, '');
 }

@@ -42,7 +42,7 @@ export const GET: APIRoute = ({ locals, url }) => {
   }
 
   const body = [
-    '# Rope Access Center — https://ropeaccesscenter.com',
+    '# Rope Access Center — https://ropeaccesscenter.id',
     '',
     'User-agent: *',
     'Allow: /',

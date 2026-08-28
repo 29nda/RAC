@@ -2,7 +2,7 @@
 # NEVER commit `.dev.vars` — it is git-ignored.
 
 # Login e-mail for the /admin dashboard
-ADMIN_EMAIL="admin@ropeaccesscenter.com"
+ADMIN_EMAIL="admin@ropeaccesscenter.id"
 
 # PBKDF2 hash of the admin password.
 # Generate with:  npm run admin:hash -- "your-strong-password"
