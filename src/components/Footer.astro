@@ -38,7 +38,7 @@ const legalLinks: Array<{ href: string; label: string }> = [
 ];
 ---
 
-<footer class="bg-navy-800 text-white/70">
+<footer class="on-navy bg-navy-800 text-white/70">
   <div class="container-rac py-14 lg:py-16">
     <div class="grid gap-10 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
       <!-- Brand -->
@@ -126,7 +126,7 @@ const legalLinks: Array<{ href: string; label: string }> = [
         </h2>
         <ul class="mt-4 space-y-3.5 text-sm">
           <li class="flex gap-3">
-            <Icon name="whatsapp" size={17} filled class="mt-0.5 flex-none text-brand-500" />
+            <Icon name="whatsapp" size={17} filled class="mt-0.5 flex-none text-brand-ink" />
             <a
               href={whatsappUrl(settings, locale)}
               target="_blank"
@@ -137,26 +137,26 @@ const legalLinks: Array<{ href: string; label: string }> = [
             </a>
           </li>
           <li class="flex gap-3">
-            <Icon name="phone" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <Icon name="phone" size={17} class="mt-0.5 flex-none text-brand-ink" />
             <a href={telUrl(settings)} class="transition-colors hover:text-white">
               {settings.phoneDisplay}
             </a>
           </li>
           <li class="flex gap-3">
-            <Icon name="mail" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <Icon name="mail" size={17} class="mt-0.5 flex-none text-brand-ink" />
             <a href={mailtoUrl(settings)} class="break-all transition-colors hover:text-white">
               {settings.email}
             </a>
           </li>
           <li class="flex gap-3">
-            <Icon name="map-pin" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <Icon name="map-pin" size={17} class="mt-0.5 flex-none text-brand-ink" />
             <address class="not-italic leading-relaxed">
               {pick(settings.addressLine, locale)}<br />
               {settings.city} {settings.postalCode}, Indonesia
             </address>
           </li>
           <li class="flex gap-3">
-            <Icon name="clock" size={17} class="mt-0.5 flex-none text-brand-500" />
+            <Icon name="clock" size={17} class="mt-0.5 flex-none text-brand-ink" />
             <span class="leading-relaxed">{pick(settings.openingHours, locale)}</span>
           </li>
         </ul>

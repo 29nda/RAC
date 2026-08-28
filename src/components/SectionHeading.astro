@@ -20,7 +20,7 @@ const centred = align === 'center';
 
   <Tag class:list={[
     'text-2xl sm:text-3xl lg:text-[2.125rem]',
-    tone === 'light' ? 'text-white' : 'text-navy-800',
+    tone === 'light' ? 'text-white' : 'text-ink',
   ]}>
     {lines.map((line, index) => (
       <>{index > 0 && <br />}{line}</>
@@ -32,7 +32,7 @@ const centred = align === 'center';
   {intro && (
     <p class:list={[
       'mt-5 text-base leading-relaxed',
-      tone === 'light' ? 'text-white/70' : 'text-steel-400',
+      tone === 'light' ? 'text-white/70' : 'text-muted',
       !centred && 'max-w-2xl',
     ]}>{intro}</p>
   )}

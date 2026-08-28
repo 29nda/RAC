@@ -13,7 +13,7 @@ directory = "./dist"
 binding = "ASSETS"
 
 [vars]
-PUBLIC_SITE_URL = "https://ropeaccesscenter.com"
+PUBLIC_SITE_URL = "https://ropeaccesscenter.id"
 PUBLIC_DEFAULT_LOCALE = "id"
 
 # ---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ id = "fc2792c1d78f486389ad159046db769c"
 
 # ---------------------------------------------------------------------------
 # Secrets (never commit these — set with `npx wrangler secret put <NAME>`)
-#   ADMIN_EMAIL           e.g. admin@ropeaccesscenter.com
+#   ADMIN_EMAIL           e.g. admin@ropeaccesscenter.id
 #   ADMIN_PASSWORD_HASH   output of `npm run admin:hash -- "your-password"`
 #   SESSION_SECRET        random 64-char hex, `openssl rand -hex 32`
 #   TURNSTILE_SECRET_KEY  optional, Cloudflare Turnstile

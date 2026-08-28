@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-EMAIL="${ADMIN_EMAIL:-admin@ropeaccesscenter.com}"
+EMAIL="${ADMIN_EMAIL:-admin@ropeaccesscenter.id}"
 PASSWORD="${1:-}"
 
 command -v node >/dev/null || { echo "node is required"; exit 1; }

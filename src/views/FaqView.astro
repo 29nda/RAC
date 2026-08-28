@@ -74,18 +74,18 @@ const jsonLd = graph([
         <!-- Section index — doubles as an in-page table of contents for crawlers -->
         <nav class="lg:col-span-3" aria-label={locale === 'id' ? 'Kategori FAQ' : 'FAQ categories'}>
           <div class="sticky top-[calc(var(--header-h)+1.5rem)]">
-            <p class="font-display text-[0.6875rem] uppercase tracking-[0.16em] text-steel-300">
+            <p class="font-display text-[0.6875rem] uppercase tracking-[0.16em] text-soft">
               {t('label.category')}
             </p>
-            <ul class="mt-4 space-y-1 border-l border-steel-100">
+            <ul class="mt-4 space-y-1 border-l border-line">
               {groups.map((section) => (
                 <li>
                   <a
                     href={`#faq-${section.group}`}
-                    class="-ml-px block border-l-2 border-transparent py-2 pl-4 text-sm text-steel-400 transition-colors hover:border-brand-600 hover:text-navy-800"
+                    class="-ml-px block border-l-2 border-transparent py-2 pl-4 text-sm text-muted transition-colors hover:border-brand-600 hover:text-ink"
                   >
                     {section.label}
-                    <span class="ml-1.5 text-[0.75rem] text-steel-300">({section.items.length})</span>
+                    <span class="ml-1.5 text-[0.75rem] text-soft">({section.items.length})</span>
                   </a>
                 </li>
               ))}
@@ -96,7 +96,7 @@ const jsonLd = graph([
         <div class="space-y-14 lg:col-span-9">
           {groups.map((section) => (
             <section id={`faq-${section.group}`} aria-labelledby={`heading-${section.group}`}>
-              <h2 id={`heading-${section.group}`} class="text-xl text-navy-800 lg:text-2xl">
+              <h2 id={`heading-${section.group}`} class="text-xl text-ink lg:text-2xl">
                 {section.label}
               </h2>
               <div class="rule-accent mt-4 mb-6"></div>

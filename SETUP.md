@@ -39,7 +39,7 @@ cp .dev.vars.example .dev.vars
 Isi ketiga nilainya:
 
 ```ini
-ADMIN_EMAIL="admin@ropeaccesscenter.com"
+ADMIN_EMAIL="admin@ropeaccesscenter.id"
 ADMIN_PASSWORD_HASH="pbkdf2$210000$…"   # hasil perintah di atas
 SESSION_SECRET="…"                       # openssl rand -hex 32
 ```
@@ -189,14 +189,14 @@ masuk memakai kredensial dari langkah 3.
 1. Tambahkan domain ke Cloudflare (Dashboard → **Add a site**) dan arahkan
    *nameserver*-nya sesuai instruksi.
 2. Buka **Workers & Pages → rac-website → Settings → Domains & Routes**.
-3. Klik **Add** → **Custom domain** → masukkan `ropeaccesscenter.com`.
-4. Ulangi untuk `www.ropeaccesscenter.com` bila diperlukan.
+3. Klik **Add** → **Custom domain** → masukkan `ropeaccesscenter.id`.
+4. Ulangi untuk `www.ropeaccesscenter.id` bila diperlukan.
 
 Perbarui URL kanonik di `wrangler.toml`:
 
 ```toml
 [vars]
-PUBLIC_SITE_URL = "https://ropeaccesscenter.com"
+PUBLIC_SITE_URL = "https://ropeaccesscenter.id"
 ```
 
 Lalu *deploy* ulang: `npm run deploy`.
@@ -249,7 +249,7 @@ apa adanya ke `dist/`, sehingga berkas tersebut mendarat di
 ## 7. Kirim situs ke mesin pencari
 
 1. **Google Search Console** → tambahkan properti domain → verifikasi lewat DNS.
-   Kirimkan `https://ropeaccesscenter.com/sitemap.xml`.
+   Kirimkan `https://ropeaccesscenter.id/sitemap.xml`.
 2. **Bing Webmaster Tools** → impor langsung dari Search Console.
 3. Periksa data terstruktur di
    [Rich Results Test](https://search.google.com/test/rich-results).

@@ -94,20 +94,20 @@ const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(s.mapEmbedQue
       <ul class="grid gap-5 md:grid-cols-3">
         {channels.map((channel) => (
           <li class="card card-hover reveal relative p-6">
-            <span class="inline-flex h-11 w-11 items-center justify-center bg-steel-50 text-brand-600">
+            <span class="inline-flex h-11 w-11 items-center justify-center bg-surface-alt text-brand-ink">
               <Icon name={channel.icon} size={21} filled={channel.filled} />
             </span>
-            <h2 class="mt-4 font-display text-[0.8125rem] uppercase tracking-[0.12em] text-steel-300">
+            <h2 class="mt-4 font-display text-[0.8125rem] uppercase tracking-[0.12em] text-soft">
               {pick(channel.title, locale)}
             </h2>
             <a
               href={channel.href}
               target={channel.external ? '_blank' : undefined}
               rel={channel.external ? 'noopener' : undefined}
-              class="mt-1.5 block break-all text-base font-semibold text-navy-800 after:absolute after:inset-0 hover:text-brand-600"
+              class="mt-1.5 block break-all text-base font-semibold text-ink after:absolute after:inset-0 hover:text-brand-ink"
               data-wa-cta={channel.icon === 'whatsapp' ? 'contact-channel' : undefined}
             >{channel.value}</a>
-            <p class="mt-2 text-[0.8125rem] leading-relaxed text-steel-400">
+            <p class="mt-2 text-[0.8125rem] leading-relaxed text-muted">
               {pick(channel.note, locale)}
             </p>
           </li>
@@ -135,26 +135,26 @@ const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(s.mapEmbedQue
 
         <aside class="lg:col-span-5">
           <div class="card p-7">
-            <h2 class="font-display text-sm uppercase tracking-[0.14em] text-navy-800">
+            <h2 class="font-display text-sm uppercase tracking-[0.14em] text-ink">
               {locale === 'id' ? 'Kantor & Fasilitas Latih' : 'Office & Training Facility'}
             </h2>
 
             <ul class="mt-5 space-y-4 text-sm">
               <li class="flex gap-3">
-                <Icon name="map-pin" size={18} class="mt-0.5 flex-none text-brand-600" />
-                <address class="not-italic leading-relaxed text-steel-500">
+                <Icon name="map-pin" size={18} class="mt-0.5 flex-none text-brand-ink" />
+                <address class="not-italic leading-relaxed text-muted">
                   {pick(s.addressLine, locale)}<br />
                   {s.city} {s.postalCode}<br />
                   {s.region}, Indonesia
                 </address>
               </li>
               <li class="flex gap-3">
-                <Icon name="clock" size={18} class="mt-0.5 flex-none text-brand-600" />
-                <span class="leading-relaxed text-steel-500">{pick(s.openingHours, locale)}</span>
+                <Icon name="clock" size={18} class="mt-0.5 flex-none text-brand-ink" />
+                <span class="leading-relaxed text-muted">{pick(s.openingHours, locale)}</span>
               </li>
               <li class="flex gap-3">
-                <Icon name="globe" size={18} class="mt-0.5 flex-none text-brand-600" />
-                <span class="leading-relaxed text-steel-500">
+                <Icon name="globe" size={18} class="mt-0.5 flex-none text-brand-ink" />
+                <span class="leading-relaxed text-muted">
                   {locale === 'id'
                     ? 'Melayani seluruh Indonesia, termasuk lokasi lepas pantai dan terpencil.'
                     : 'Serving all of Indonesia, including offshore and remote locations.'}
@@ -162,7 +162,7 @@ const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(s.mapEmbedQue
               </li>
             </ul>
 
-            <div class="mt-6 overflow-hidden border border-steel-100">
+            <div class="mt-6 overflow-hidden border border-line">
               <iframe
                 src={mapSrc}
                 title={locale === 'id' ? `Peta lokasi ${s.brandName}` : `Map showing ${s.brandName}`}

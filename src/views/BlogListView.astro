@@ -79,8 +79,8 @@ const jsonLd = graph([
           </div>
 
           <div class="p-7 lg:col-span-8 lg:p-10">
-            <div class="flex flex-wrap items-center gap-3 text-[0.75rem] text-steel-300">
-              <span class="font-display font-bold uppercase tracking-[0.12em] text-brand-600">
+            <div class="flex flex-wrap items-center gap-3 text-[0.75rem] text-soft">
+              <span class="font-display font-bold uppercase tracking-[0.12em] text-brand-ink">
                 {pick(lead.category, locale)}
               </span>
               <span aria-hidden="true">·</span>
@@ -91,17 +91,17 @@ const jsonLd = graph([
               </span>
             </div>
 
-            <h2 class="mt-4 text-xl leading-snug text-navy-800 lg:text-2xl">
+            <h2 class="mt-4 text-xl leading-snug text-ink lg:text-2xl">
               <a href={localizedPath('blog', locale, lead.slug)} class="after:absolute after:inset-0">
                 {pick(lead.title, locale)}
               </a>
             </h2>
 
-            <p class="mt-4 text-[0.9375rem] leading-relaxed text-steel-400">
+            <p class="mt-4 text-[0.9375rem] leading-relaxed text-muted">
               {pick(lead.excerpt, locale)}
             </p>
 
-            <p class="mt-6 flex items-center gap-2 font-display text-[0.75rem] font-bold uppercase tracking-[0.1em] text-brand-600">
+            <p class="mt-6 flex items-center gap-2 font-display text-[0.75rem] font-bold uppercase tracking-[0.1em] text-brand-ink">
               {t('cta.learnMore')}
               <Icon name="arrow-right" size={15} />
             </p>

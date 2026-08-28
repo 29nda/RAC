@@ -22,7 +22,7 @@ export const settings: SiteSettings = {
     en: 'Hello RAC, I would like to ask about',
   },
   phoneDisplay: '+62 812 3456 7890',
-  email: 'info@ropeaccesscenter.com',
+  email: 'info@ropeaccesscenter.id',
 
   addressLine: {
     id: 'Jl. Industri Raya No. 10, Kawasan Industri',

@@ -99,7 +99,7 @@ const ABOUT_PILLARS = [
   jsonLd={jsonLd}
 >
   <!-- ============================== Hero ============================== -->
-  <section class="relative overflow-hidden bg-navy-800 text-white">
+  <section class="on-navy relative overflow-hidden bg-navy-800 text-white">
     <div class="absolute inset-0 grid-noise opacity-70" aria-hidden="true"></div>
     <div
       class="absolute inset-y-0 right-0 w-full bg-[radial-gradient(ellipse_at_75%_35%,rgba(227,6,19,0.22),transparent_58%)]"
@@ -122,7 +122,7 @@ const ABOUT_PILLARS = [
                 {line.split(' ').map((word, wordIndex) => (
                   <>
                     {wordIndex > 0 && ' '}
-                    <span class={wordIndex === 1 ? 'text-brand-600' : ''}>{word}</span>
+                    <span class={wordIndex === 1 ? 'text-brand-ink' : ''}>{word}</span>
                   </>
                 ))}
               </>
@@ -205,10 +205,10 @@ const ABOUT_PILLARS = [
   </section>
 
   <!-- ============================ About ============================== -->
-  <section class="bg-steel-50 py-16 lg:py-24">
+  <section class="bg-surface-alt py-16 lg:py-24">
     <div class="container-rac">
       <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-        <div class="reveal relative overflow-hidden bg-navy-800 p-10 lg:p-14">
+        <div class="on-navy reveal relative overflow-hidden bg-navy-800 p-10 lg:p-14">
           <div class="absolute inset-0 grid-noise opacity-60" aria-hidden="true"></div>
           <div
             class="absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-brand-600/20 blur-3xl"
@@ -239,9 +239,9 @@ const ABOUT_PILLARS = [
           <ul class="reveal mt-9 grid gap-6 sm:grid-cols-3">
             {ABOUT_PILLARS.map((pillar) => (
               <li>
-                <Icon name={pillar.icon} size={26} class="text-brand-600" />
-                <h3 class="mt-3 text-sm text-navy-800">{pick(pillar.title, locale)}</h3>
-                <p class="mt-1.5 text-[0.8125rem] leading-relaxed text-steel-400">
+                <Icon name={pillar.icon} size={26} class="text-brand-ink" />
+                <h3 class="mt-3 text-sm text-ink">{pick(pillar.title, locale)}</h3>
+                <p class="mt-1.5 text-[0.8125rem] leading-relaxed text-muted">
                   {pick(pillar.body, locale)}
                 </p>
               </li>
@@ -272,7 +272,7 @@ const ABOUT_PILLARS = [
   </section>
 
   <!-- =========================== Courses ============================= -->
-  <section class="bg-steel-50 py-16 lg:py-24">
+  <section class="bg-surface-alt py-16 lg:py-24">
     <div class="container-rac">
       <div class="flex flex-wrap items-end justify-between gap-6">
         <SectionHeading
@@ -311,7 +311,7 @@ const ABOUT_PILLARS = [
 
   <!-- ============================== FAQ ============================== -->
   {faqs.length > 0 && (
-    <section class="bg-steel-50 py-16 lg:py-24">
+    <section class="bg-surface-alt py-16 lg:py-24">
       <div class="container-rac">
         <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
           <div class="lg:col-span-5">

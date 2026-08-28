@@ -65,7 +65,7 @@ const jsonLd = graph([
 
   <section class="py-16 lg:py-20">
     <div class="container-rac">
-      <p class="max-w-3xl text-base leading-relaxed text-steel-400">{pick(page.intro, locale)}</p>
+      <p class="max-w-3xl text-base leading-relaxed text-muted">{pick(page.intro, locale)}</p>
 
       <div class="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
         {services.map((service) => <ServiceCard locale={locale} service={service} />)}
@@ -74,7 +74,7 @@ const jsonLd = graph([
   </section>
 
   {faqs.length > 0 && (
-    <section class="bg-steel-50 py-16 lg:py-20">
+    <section class="bg-surface-alt py-16 lg:py-20">
       <div class="container-rac">
         <div class="grid gap-10 lg:grid-cols-12 lg:gap-14">
           <div class="lg:col-span-5">
