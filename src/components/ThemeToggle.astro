@@ -45,14 +45,16 @@ const label = locale === 'id'
 
     var STORAGE_KEY = 'rac-theme';
 
-    function stored() {
-      try { return window.localStorage.getItem(STORAGE_KEY); } catch (error) { return null; }
+    // Terang adalah bawaan situs. Setelan sistem sengaja tidak dibaca: tema
+    // gelap hanya muncul bila pembaca memintanya lewat tombol ini.
+    function active() {
+      return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
     }
 
-    function active() {
-      var set = document.documentElement.getAttribute('data-theme');
-      if (set === 'dark' || set === 'light') return set;
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Warna bilah peramban ikut tema yang sedang aktif, bukan setelan sistem.
+    function paintBrowserChrome(theme) {
+      var meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', theme === 'dark' ? '#080d14' : '#ffffff');
     }
 
     function paint(theme) {
@@ -75,6 +77,7 @@ const label = locale === 'id'
 
       var next = active() === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
+      paintBrowserChrome(next);
       try {
         window.localStorage.setItem(STORAGE_KEY, next);
       } catch (error) {
@@ -84,7 +87,10 @@ const label = locale === 'id'
       paint(next);
     });
 
-    function sync() { paint(active()); }
+    function sync() {
+      paint(active());
+      paintBrowserChrome(active());
+    }
 
     // Paint once the whole document exists, so buttons further down are found.
     if (document.readyState === 'loading') {
@@ -92,10 +98,5 @@ const label = locale === 'id'
     } else {
       sync();
     }
-
-    // Keep following the system for as long as the reader has chosen nothing.
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-      if (!stored()) sync();
-    });
   })();
 </script>
