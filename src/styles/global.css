@@ -130,23 +130,12 @@
     --brand-ink: var(--color-brand-lift);
   }
 
-  /* Tema gelap — mengikuti setelan sistem selama pembaca belum memilih.
-     Nilainya sengaja digandakan: berkas ini tidak melewati prapemroses, dan
-     satu-satunya alternatif adalah memaksa JavaScript menetapkan tema, yang
-     akan mematikan dukungan bagi peramban tanpa JavaScript. */
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) {
-      color-scheme: dark;
-      --color-surface: #080d14;
-      --color-surface-alt: #0d1b2a;
-      --color-card: #101c2e;
-      --color-ink: #e6edf5;
-      --color-muted: #b6c6d8;
-      --color-soft: #8fa5bd;
-      --color-line: #1d2f45;
-      --brand-ink: var(--color-brand-lift);
-    }
-  }
+  /* Tema bawaan situs ini adalah terang, terlepas dari setelan sistem
+     pembaca. Tema gelap hanya berlaku bila pembaca memilihnya sendiri lewat
+     tombol pengalih, yang menyetel [data-theme='dark'] di atas. Itulah
+     sebabnya di sini tidak ada blok @media (prefers-color-scheme: dark):
+     menambahkannya akan membuat sebagian pengunjung mendarat di tema gelap
+     tanpa pernah memintanya. */
 
   * {
     min-width: 0;

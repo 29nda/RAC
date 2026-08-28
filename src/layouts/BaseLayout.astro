@@ -88,14 +88,15 @@ const metaDescription = description.length > 158
     <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImage} />
 
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#080d14" media="(prefers-color-scheme: dark)" />
+    {/* Satu nilai saja, tanpa media query: tema bawaan situs ini terang, dan
+        skrip pengalih tema memperbaruinya saat pembaca memilih tema gelap. */}
+    <meta name="theme-color" content="#ffffff" />
 
     <script nonce={nonce} is:inline>
       // Applies the stored theme before the first paint. Without this the page
-      // renders in the default theme and then flips, which is far more jarring
-      // than the theme being briefly wrong. Nothing is written when no choice
-      // has been stored, so the CSS media query keeps following the system.
+      // renders light and then flips, which is far more jarring than the theme
+      // being briefly wrong. Nothing is written when no choice has been stored,
+      // and light is what the stylesheet gives by default.
       (function () {
         try {
           var stored = window.localStorage.getItem('rac-theme');
